@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ShieldCheck, LayoutDashboard, Store, LogOut } from "lucide-react";
+import { ShieldCheck, LayoutDashboard, Store, Users, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { createClient } from "@/lib/supabase/client";
 
 const navItems = [
   { href: "/admin", label: "Ringkasan", icon: LayoutDashboard },
   { href: "/admin/tenants", label: "Tenant", icon: Store },
+  { href: "/admin/users", label: "Pengguna", icon: Users },
 ];
 
 export function AdminSidebar() {
