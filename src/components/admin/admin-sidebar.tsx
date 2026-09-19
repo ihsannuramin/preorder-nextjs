@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ShieldCheck, LayoutDashboard, LogOut } from "lucide-react";
+import { ShieldCheck, LayoutDashboard, Store, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { createClient } from "@/lib/supabase/client";
 
-const navItems = [{ href: "/admin", label: "Ringkasan", icon: LayoutDashboard }];
+const navItems = [
+  { href: "/admin", label: "Ringkasan", icon: LayoutDashboard },
+  { href: "/admin/tenants", label: "Tenant", icon: Store },
+];
 
 export function AdminSidebar() {
   const pathname = usePathname();
@@ -30,7 +33,10 @@ export function AdminSidebar() {
 
       <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
         {navItems.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+          const isActive =
+            item.href === "/admin"
+              ? pathname === "/admin"
+              : pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
               key={item.href}

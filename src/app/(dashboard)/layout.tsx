@@ -5,6 +5,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { StoreCompletionBanner } from "@/components/shared/store-completion-banner";
+import { StoreSuspendedBanner } from "@/components/shared/store-suspended-banner";
 
 export default async function DashboardLayout({
   children,
@@ -27,11 +28,13 @@ export default async function DashboardLayout({
   const isStoreComplete = Boolean(
     dbUser?.store?.name && dbUser.store.slug && dbUser.store.whatsapp
   );
+  const isStoreActive = dbUser?.store ? dbUser.store.isActive : true;
 
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />
       <DashboardShell>
+        <StoreSuspendedBanner isActive={isStoreActive} />
         <StoreCompletionBanner isComplete={isStoreComplete} />
         {children}
       </DashboardShell>
