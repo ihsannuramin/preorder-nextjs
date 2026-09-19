@@ -10,6 +10,11 @@ datasource db {
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
+enum UserRole {
+  OWNER
+  SUPER_ADMIN
+}
+
 enum ProductStatus {
   DRAFT
   PUBLISHED
@@ -105,12 +110,28 @@ model User {
   supabaseId   String   @unique
   email        String   @unique
   businessName String
+  role         UserRole @default(OWNER)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   store Store?
 
   @@map("users")
+}
+
+model AdminAuditLog {
+  id            String   @id @default(cuid())
+  actorUserId   String
+  actorEmail    String
+  action        String
+  targetStoreId String?
+  targetUserId  String?
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  @@index([actorUserId])
+  @@index([targetStoreId])
+  @@map("admin_audit_logs")
 }
 
 model Store {

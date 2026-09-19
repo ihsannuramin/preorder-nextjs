@@ -13,6 +13,7 @@
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
     "db:seed": "node --env-file=.env --experimental-strip-types prisma/seed.ts",
+    "admin:promote": "node --env-file=.env --experimental-strip-types prisma/promote-admin.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
