@@ -11,7 +11,8 @@ import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { CATEGORY_LABELS } from "@/lib/constants/categories";
 import { calculateHpp } from "@/lib/utils/hpp";
 import { calculateCapacity } from "@/lib/utils/production";
-import { Plus, Package, Search } from "lucide-react";
+import { isRecipeSetupIncomplete } from "@/lib/utils/product-setup";
+import { Plus, Package, Search, AlertTriangle } from "lucide-react";
 import Image from "next/image";
 import type { ProductStatus } from "@prisma/client";
 
@@ -72,6 +73,7 @@ async function ProductList({ q, page }: { q?: string; page: number }) {
             }))
           );
           const cfg = statusConfig[product.status];
+          const setupIncomplete = isRecipeSetupIncomplete(product);
 
           return (
             <Link
@@ -105,6 +107,12 @@ async function ProductList({ q, page }: { q?: string; page: number }) {
                     {Number.isFinite(capacity) && (
                       <p className="text-xs text-muted-foreground mt-0.5">
                         Bisa produksi: {capacity} pcs
+                      </p>
+                    )}
+                    {setupIncomplete && (
+                      <p className="flex items-center gap-1 text-xs text-warning mt-0.5 font-medium">
+                        <AlertTriangle className="h-3 w-3" />
+                        Resep belum lengkap
                       </p>
                     )}
                   </div>

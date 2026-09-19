@@ -89,7 +89,7 @@ export async function getProductsList(filters?: {
   const [rows, total] = await Promise.all([
     prisma.product.findMany({
       where,
-      include: { recipeItems: { include: { ingredient: true } } },
+      include: { recipeItems: { include: { ingredient: true } }, additionalCosts: true },
       orderBy: [{ displayOrder: "asc" }, { createdAt: "desc" }],
       skip,
       take: pageSize,

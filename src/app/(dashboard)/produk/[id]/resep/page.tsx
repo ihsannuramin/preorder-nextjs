@@ -1,5 +1,6 @@
-import { getRecipeItems } from "@/actions/recipes";
-import { ResepClient } from "./resep-client";
+import { notFound } from "next/navigation";
+import { getProduct } from "@/actions/products";
+import { ResepClient, type RecipeWithIngredient } from "./resep-client";
 
 export default async function ResepPage({
   params,
@@ -7,7 +8,13 @@ export default async function ResepPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const recipeItems = await getRecipeItems(id);
+  const product = await getProduct(id);
+  if (!product) notFound();
 
-  return <ResepClient productId={id} initialRecipeItems={recipeItems} />;
+  return (
+    <ResepClient
+      product={product}
+      initialRecipeItems={product.recipeItems as RecipeWithIngredient[]}
+    />
+  );
 }
