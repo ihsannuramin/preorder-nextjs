@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ShieldCheck, LayoutDashboard, Store, Users, ShoppingBag, LogOut } from "lucide-react";
+import { ShieldCheck, LayoutDashboard, Store, Users, ShoppingBag, FileText, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { createClient } from "@/lib/supabase/client";
 
@@ -11,6 +11,7 @@ const navItems = [
   { href: "/admin/tenants", label: "Tenant", icon: Store },
   { href: "/admin/users", label: "Pengguna", icon: Users },
   { href: "/admin/orders", label: "Pesanan", icon: ShoppingBag },
+  { href: "/admin/logs", label: "Log Sistem", icon: FileText },
 ];
 
 export function AdminSidebar() {
