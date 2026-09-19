@@ -56,11 +56,13 @@ export function ListPagination({
   page,
   pageSize,
   search,
+  extraParams,
 }: {
   total: number;
   page: number;
   pageSize: number;
   search?: string;
+  extraParams?: Record<string, string | undefined>;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -74,6 +76,11 @@ export function ListPagination({
   const navigate = (newPage: number) => {
     const params = new URLSearchParams();
     if (search) params.set("q", search);
+    if (extraParams) {
+      for (const [key, value] of Object.entries(extraParams)) {
+        if (value) params.set(key, value);
+      }
+    }
     params.set("page", String(newPage));
     router.replace(`${pathname}?${params}`);
   };
