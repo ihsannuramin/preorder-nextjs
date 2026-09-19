@@ -339,6 +339,7 @@ async function main() {
       await prisma.order.create({
         data: {
           campaignId: campaign1.id,
+          storeId: store.id,
           orderNumber,
           customerName: o.customer.name,
           customerPhone: o.customer.phone,
@@ -469,6 +470,7 @@ async function main() {
       await prisma.order.create({
         data: {
           campaignId: campaign2.id,
+          storeId: store.id,
           orderNumber,
           customerName: o.customer.name,
           customerPhone: o.customer.phone,

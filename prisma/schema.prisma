@@ -155,6 +155,7 @@ model Store {
   products    Product[]
   ingredients Ingredient[]
   campaigns   Campaign[]
+  orders      Order[]
 
   @@map("stores")
 }
@@ -292,7 +293,8 @@ model CampaignProduct {
 model Order {
   id               String      @id @default(cuid())
   campaignId       String
-  orderNumber      String      @unique
+  storeId          String
+  orderNumber      String
   customerName     String
   customerPhone    String
   customerAddress  String
@@ -308,8 +310,11 @@ model Order {
   updatedAt        DateTime    @updatedAt
 
   campaign Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  store    Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
   items    OrderItem[]
 
+  @@unique([storeId, orderNumber])
+  @@index([storeId])
   @@map("orders")
 }
 

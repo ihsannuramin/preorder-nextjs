@@ -43,7 +43,7 @@ function serializeOrder<T extends Order & { items: OrderItem[]; campaign?: Campa
 async function generateOrderNumber(storeId: string): Promise<string> {
   const year = new Date().getFullYear();
   const count = await prisma.order.count({
-    where: { campaign: { storeId } },
+    where: { storeId },
   });
   return formatOrderNumber(year, count + 1);
 }
@@ -163,6 +163,7 @@ export async function createPublicOrder(data: {
         order = await prisma.order.create({
           data: {
             campaignId: data.campaignId,
+            storeId: campaign.storeId,
             orderNumber,
             customerName: data.customerName,
             customerPhone: data.customerPhone,

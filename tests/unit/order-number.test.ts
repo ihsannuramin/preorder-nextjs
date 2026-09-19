@@ -26,6 +26,10 @@ describe("isOrderNumberConflict", () => {
     expect(isOrderNumberConflict(makeUniqueConstraintError(["orderNumber"]))).toBe(true);
   });
 
+  it("returns true for a compound unique-constraint error including orderNumber (e.g. [storeId, orderNumber])", () => {
+    expect(isOrderNumberConflict(makeUniqueConstraintError(["storeId", "orderNumber"]))).toBe(true);
+  });
+
   it("returns false for a P2002 error on a different field", () => {
     expect(isOrderNumberConflict(makeUniqueConstraintError(["email"]))).toBe(false);
   });
