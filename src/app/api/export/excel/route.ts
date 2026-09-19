@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { createLogger } from "@/lib/logger";
 import * as XLSX from "xlsx";
+
+const logger = createLogger("route:export/excel");
 
 async function getStore() {
   const supabase = await createClient();
@@ -49,7 +52,8 @@ export async function GET(request: NextRequest) {
         "Content-Disposition": "attachment; filename=laporan-pesanan.xlsx",
       },
     });
-  } catch {
+  } catch (err) {
+    logger.error("Excel export failed", err);
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }

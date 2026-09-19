@@ -5,7 +5,10 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { CampaignStatus } from "@prisma/client";
+import { createLogger } from "@/lib/logger";
 import type { ActionResult } from "@/types";
+
+const logger = createLogger("action:campaigns");
 
 async function getStore() {
   const supabase = await createClient();
@@ -122,7 +125,8 @@ export async function createCampaign(data: {
     });
     revalidatePath("/periode-po");
     return { success: true, data: { id: campaign.id } };
-  } catch {
+  } catch (err) {
+    logger.error("createCampaign failed", err);
     return { success: false, error: "Terjadi kesalahan saat membuat periode PO" };
   }
 }
@@ -140,7 +144,8 @@ export async function updateCampaignStatus(
     revalidatePath("/periode-po");
     revalidatePath(`/periode-po/${id}`);
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("updateCampaignStatus failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
@@ -151,7 +156,8 @@ export async function deleteCampaign(id: string): Promise<ActionResult> {
     await prisma.campaign.delete({ where: { id, storeId: store.id } });
     revalidatePath("/periode-po");
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("deleteCampaign failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }

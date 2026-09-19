@@ -46,6 +46,7 @@ export async function middleware(request: NextRequest) {
     "/pesanan",
     "/keuntungan",
     "/laporan",
+    "/kalkulator-hpp",
   ];
   const isDashboard = DASHBOARD_ROOTS.some(
     (root) => pathname === root || pathname.startsWith(root + "/"),
@@ -66,6 +67,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_n  |_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

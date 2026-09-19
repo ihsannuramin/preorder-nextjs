@@ -7,7 +7,10 @@ import { prisma } from "@/lib/prisma";
 import type { z } from "zod";
 import { ingredientSchema, ingredientMetaSchema } from "@/lib/validations/ingredient";
 import { applyPurchase } from "@/lib/utils/stock";
+import { createLogger } from "@/lib/logger";
 import type { ActionResult } from "@/types";
+
+const logger = createLogger("action:ingredients");
 
 async function getStoreAndUser() {
   const supabase = await createClient();
@@ -161,7 +164,8 @@ export async function createIngredient(
 
     revalidatePath("/bahan-baku");
     return { success: true, data: { id: ingredient.id } };
-  } catch {
+  } catch (err) {
+    logger.error("createIngredient failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
@@ -233,7 +237,8 @@ export async function createIngredientsBatch(
 
     revalidatePath("/bahan-baku");
     return { success: true, data: { count: parsedRows.length } };
-  } catch {
+  } catch (err) {
+    logger.error("createIngredientsBatch failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
@@ -262,7 +267,8 @@ export async function updateIngredient(
     revalidatePath("/bahan-baku");
     revalidatePath(`/bahan-baku/${id}`);
     return { success: true, data: serializeIngredient(ingredient) };
-  } catch {
+  } catch (err) {
+    logger.error("updateIngredient failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
@@ -273,7 +279,8 @@ export async function deleteIngredient(id: string): Promise<ActionResult> {
     await prisma.ingredient.delete({ where: { id, storeId: store.id } });
     revalidatePath("/bahan-baku");
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("deleteIngredient failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }

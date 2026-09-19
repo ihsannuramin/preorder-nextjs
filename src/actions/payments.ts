@@ -5,7 +5,10 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/prisma";
+import { createLogger } from "@/lib/logger";
 import type { ActionResult } from "@/types";
+
+const logger = createLogger("action:payments");
 
 const PAYMENT_PROOF_BUCKET =
   process.env.NEXT_PUBLIC_STORAGE_BUCKET_PAYMENTS ?? "payment-proofs";
@@ -40,7 +43,8 @@ export async function approvePayment(orderId: string): Promise<ActionResult> {
     revalidatePath("/pesanan");
     revalidatePath(`/pesanan/${orderId}`);
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("approvePayment failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
@@ -65,6 +69,7 @@ export async function getPaymentProofUrl(
       .createSignedUrl(path, 300);
 
     if (error || !data) {
+      logger.error("getPaymentProofUrl: signed URL creation failed", error);
       return { success: false, error: "Gagal memuat bukti pembayaran" };
     }
 
@@ -72,7 +77,8 @@ export async function getPaymentProofUrl(
       success: true,
       data: { url: data.signedUrl, isPdf: /\.pdf$/i.test(path) },
     };
-  } catch {
+  } catch (err) {
+    logger.error("getPaymentProofUrl failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
@@ -87,7 +93,8 @@ export async function approveGroupPayment(groupOrderId: string): Promise<ActionR
     revalidatePath("/pesanan/grup");
     revalidatePath(`/pesanan/grup/${groupOrderId}`);
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("approveGroupPayment failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
@@ -112,6 +119,7 @@ export async function getGroupPaymentProofUrl(
       .createSignedUrl(path, 300);
 
     if (error || !data) {
+      logger.error("getGroupPaymentProofUrl: signed URL creation failed", error);
       return { success: false, error: "Gagal memuat bukti pembayaran" };
     }
 
@@ -119,7 +127,8 @@ export async function getGroupPaymentProofUrl(
       success: true,
       data: { url: data.signedUrl, isPdf: /\.pdf$/i.test(path) },
     };
-  } catch {
+  } catch (err) {
+    logger.error("getGroupPaymentProofUrl failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
@@ -141,7 +150,8 @@ export async function rejectGroupPayment(
     revalidatePath("/pesanan/grup");
     revalidatePath(`/pesanan/grup/${groupOrderId}`);
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("rejectGroupPayment failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
@@ -163,7 +173,8 @@ export async function rejectPayment(
     revalidatePath("/pesanan");
     revalidatePath(`/pesanan/${orderId}`);
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("rejectPayment failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }

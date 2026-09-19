@@ -4,9 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
-import { OrderStatus, Prisma } from "@prisma/client";
+import { OrderStatus } from "@prisma/client";
 import { calculateHpp } from "@/lib/utils/hpp";
+import { formatOrderNumber, isOrderNumberConflict } from "@/lib/utils/order-number";
+import { createLogger } from "@/lib/logger";
 import type { ActionResult } from "@/types";
+
+const logger = createLogger("action:orders");
 
 async function getStore() {
   const supabase = await createClient();
@@ -41,7 +45,7 @@ async function generateOrderNumber(storeId: string): Promise<string> {
   const count = await prisma.order.count({
     where: { campaign: { storeId } },
   });
-  return `PO-${year}-${String(count + 1).padStart(4, "0")}`;
+  return formatOrderNumber(year, count + 1);
 }
 
 export async function getOrders(filters?: {
@@ -171,16 +175,13 @@ export async function createPublicOrder(data: {
         });
         break;
       } catch (e) {
-        const isOrderNumberConflict =
-          e instanceof Prisma.PrismaClientKnownRequestError &&
-          e.code === "P2002" &&
-          (e.meta?.target as string[] | undefined)?.includes("orderNumber");
-        if (!isOrderNumberConflict || attempt === MAX_ATTEMPTS) throw e;
+        if (!isOrderNumberConflict(e) || attempt === MAX_ATTEMPTS) throw e;
       }
     }
 
     return { success: true, data: { orderNumber: order!.orderNumber, orderId: order!.id } };
-  } catch (e) {
+  } catch (err) {
+    logger.error("createPublicOrder failed", err);
     return { success: false, error: "Terjadi kesalahan saat membuat pesanan" };
   }
 }
@@ -228,7 +229,8 @@ export async function updateOrderStatus(
     revalidatePath("/pesanan");
     revalidatePath(`/pesanan/${id}`);
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("updateOrderStatus failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
@@ -245,7 +247,8 @@ export async function bulkUpdateOrderStatus(
     });
     revalidatePath("/pesanan");
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("bulkUpdateOrderStatus failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
@@ -263,7 +266,8 @@ export async function uploadPaymentProof(
       },
     });
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("uploadPaymentProof failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }

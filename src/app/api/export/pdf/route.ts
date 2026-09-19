@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { createLogger } from "@/lib/logger";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
+const logger = createLogger("route:export/pdf");
 
 async function getStore() {
   const supabase = await createClient();
@@ -25,57 +30,38 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    const html = `<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <title>Laporan POHub</title>
-  <style>
-    body { font-family: sans-serif; font-size: 12px; color: #111; }
-    h1 { font-size: 18px; margin-bottom: 4px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-    th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; }
-    th { background: #f3f4f6; font-weight: 600; }
-  </style>
-</head>
-<body>
-  <h1>Laporan Pesanan — ${store.name}</h1>
-  <p>Diekspor: ${new Date().toLocaleDateString("id-ID")}</p>
-  <table>
-    <thead>
-      <tr>
-        <th>No. Pesanan</th>
-        <th>Pelanggan</th>
-        <th>Total</th>
-        <th>Status</th>
-        <th>Kampanye</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${orders
-        .map(
-          (o) => `
-        <tr>
-          <td>${o.orderNumber}</td>
-          <td>${o.customerName}</td>
-          <td>Rp ${Number(o.totalAmount).toLocaleString("id-ID")}</td>
-          <td>${o.status}</td>
-          <td>${o.campaign.name}</td>
-        </tr>`
-        )
-        .join("")}
-    </tbody>
-  </table>
-</body>
-</html>`;
+    const doc = new jsPDF();
 
-    return new NextResponse(html, {
+    doc.setFontSize(14);
+    doc.text(`Laporan Pesanan — ${store.name}`, 14, 16);
+    doc.setFontSize(10);
+    doc.text(`Diekspor: ${new Date().toLocaleDateString("id-ID")}`, 14, 22);
+
+    autoTable(doc, {
+      startY: 28,
+      head: [["No. Pesanan", "Pelanggan", "Total", "Status", "Kampanye"]],
+      body: orders.map((o) => [
+        o.orderNumber,
+        o.customerName,
+        `Rp ${Number(o.totalAmount).toLocaleString("id-ID")}`,
+        o.status,
+        o.campaign.name,
+      ]),
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [139, 92, 246] },
+    });
+
+    const buffer = Buffer.from(doc.output("arraybuffer"));
+    const filename = type === "profit" ? "laporan-keuntungan.pdf" : "laporan-pesanan.pdf";
+
+    return new NextResponse(buffer, {
       headers: {
-        "Content-Type": "text/html; charset=utf-8",
-        "Content-Disposition": "attachment; filename=laporan-pesanan.html",
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="${filename}"`,
       },
     });
-  } catch {
+  } catch (err) {
+    logger.error("PDF export failed", err);
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }

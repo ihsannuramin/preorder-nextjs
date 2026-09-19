@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { generateProductionNeeds } from "@/lib/utils/production";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("route:export/csv");
 
 async function getStore() {
   const supabase = await createClient();
@@ -78,6 +82,50 @@ export async function GET(request: NextRequest) {
       });
       csv = toCSV(rows);
       filename = "laporan-keuntungan";
+    } else if (type === "production") {
+      const orderItems = await prisma.orderItem.findMany({
+        where: {
+          order: {
+            status: { in: ["PAID", "PRODUCTION", "READY", "COMPLETED"] },
+            campaign: { storeId: store.id },
+          },
+        },
+        include: {
+          product: {
+            include: {
+              recipeItems: { include: { ingredient: true } },
+            },
+          },
+        },
+      });
+
+      const needs = generateProductionNeeds(
+        orderItems.map((item) => ({
+          quantity: item.quantity,
+          product: item.product
+            ? {
+                recipeItems: item.product.recipeItems.map((ri) => ({
+                  quantity: Number(ri.quantity),
+                  ingredient: {
+                    id: ri.ingredient.id,
+                    name: ri.ingredient.name,
+                    unit: ri.ingredient.unit,
+                    averageCost: Number(ri.ingredient.averageCost),
+                  },
+                })),
+              }
+            : null,
+        }))
+      );
+
+      const rows = needs.map((n) => ({
+        "Bahan Baku": n.ingredientName,
+        "Satuan": n.unit,
+        "Total Kebutuhan": n.totalQuantity,
+        "Estimasi Biaya": n.estimatedCost,
+      }));
+      csv = toCSV(rows);
+      filename = "laporan-produksi";
     }
 
     return new NextResponse(csv, {
@@ -86,7 +134,8 @@ export async function GET(request: NextRequest) {
         "Content-Disposition": `attachment; filename="${filename}.csv"`,
       },
     });
-  } catch (e) {
+  } catch (err) {
+    logger.error("CSV export failed", err);
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }
