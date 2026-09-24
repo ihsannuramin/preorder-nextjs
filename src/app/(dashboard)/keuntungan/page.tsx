@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { PageSkeleton } from "@/components/shared/loading-skeleton";
+import { getStoreFinanceSummary } from "@/lib/utils/finance";
 import { TrendingUp, TrendingDown, DollarSign, Package } from "lucide-react";
 
 async function ProfitContent() {
@@ -18,19 +19,9 @@ async function ProfitContent() {
   });
   if (!dbUser?.store) return <p className="text-muted-foreground">Buat toko terlebih dahulu.</p>;
 
-  const result = await prisma.order.aggregate({
-    where: {
-      campaign: { storeId: dbUser.store.id },
-      status: { in: ["PAID", "PRODUCTION", "READY", "COMPLETED"] },
-    },
-    _sum: { totalAmount: true, totalHpp: true },
-    _count: true,
-  });
-
-  const revenue = Number(result._sum.totalAmount ?? 0);
-  const totalHpp = Number(result._sum.totalHpp ?? 0);
-  const profit = revenue - totalHpp;
-  const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
+  const { revenue, totalHpp, profit, margin, paidOrderCount } = await getStoreFinanceSummary(
+    dbUser.store.id
+  );
 
   const metrics = [
     { label: "Total Pendapatan", value: revenue, icon: DollarSign, color: "text-primary-600" },
@@ -75,7 +66,7 @@ async function ProfitContent() {
                 />
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                dari {result._count} pesanan lunas
+                dari {paidOrderCount} pesanan lunas
               </p>
             </div>
           </div>

@@ -4,7 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { createLogger } from "@/lib/logger";
 import type { ActionResult } from "@/types";
+
+const logger = createLogger("action:recipes");
 
 async function getStore() {
   const supabase = await createClient();
@@ -38,7 +41,8 @@ export async function addRecipeItem(
 
     revalidatePath(`/produk/${productId}/resep`);
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("addRecipeItem failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
@@ -60,7 +64,8 @@ export async function removeRecipeItem(
 
     revalidatePath(`/produk/${productId}/resep`);
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("removeRecipeItem failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }

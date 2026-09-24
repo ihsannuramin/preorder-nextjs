@@ -6,7 +6,11 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { calculateHpp } from "@/lib/utils/hpp";
 import { calculateCapacity } from "@/lib/utils/production";
+import { productSchema, productUpdateSchema, type ProductInput } from "@/lib/validations/product";
+import { createLogger } from "@/lib/logger";
 import type { ActionResult } from "@/types";
+
+const logger = createLogger("action:products");
 
 async function getStore() {
   const supabase = await createClient();
@@ -85,7 +89,7 @@ export async function getProductsList(filters?: {
   const [rows, total] = await Promise.all([
     prisma.product.findMany({
       where,
-      include: { recipeItems: { include: { ingredient: true } } },
+      include: { recipeItems: { include: { ingredient: true } }, additionalCosts: true },
       orderBy: [{ displayOrder: "asc" }, { createdAt: "desc" }],
       skip,
       take: pageSize,
@@ -124,56 +128,55 @@ export async function createProduct(data: {
   status: string;
 }): Promise<ActionResult<{ id: string }>> {
   try {
+    const parsed = productSchema.safeParse(data);
+    if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
+    const input = parsed.data;
+
     const store = await getStore();
     const product = await prisma.product.create({
       data: {
         storeId: store.id,
-        name: data.name,
-        description: data.description,
-        imageUrl: data.images?.[0] ?? data.imageUrl,
-        images: data.images ?? [],
-        category: data.category as any,
-        costMode: (data.costMode ?? "RECIPE") as any,
-        manualCostPrice: data.manualCostPrice,
-        basePrice: data.basePrice,
-        status: data.status as any,
+        name: input.name,
+        description: input.description,
+        imageUrl: input.images?.[0] ?? input.imageUrl,
+        images: input.images ?? [],
+        category: input.category,
+        costMode: input.costMode,
+        manualCostPrice: input.manualCostPrice,
+        basePrice: input.basePrice,
+        status: input.status,
       },
     });
     revalidatePath("/produk");
     return { success: true, data: { id: product.id } };
-  } catch {
+  } catch (err) {
+    logger.error("createProduct failed", err);
     return { success: false, error: "Terjadi kesalahan saat membuat produk" };
   }
 }
 
 export async function updateProduct(
   id: string,
-  data: Partial<{
-    name: string;
-    description: string;
-    imageUrl: string;
-    images: string[];
-    category: string;
-    costMode: string;
-    manualCostPrice: number | null;
-    basePrice: number;
-    status: string;
-  }>
+  data: Partial<ProductInput>
 ): Promise<ActionResult> {
   try {
+    const parsed = productUpdateSchema.safeParse(data);
+    if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
+    const { images, ...rest } = parsed.data;
+
     const store = await getStore();
-    const { images, ...rest } = data;
     await prisma.product.update({
       where: { id, storeId: store.id },
       data: {
         ...rest,
         ...(images ? { images, imageUrl: images[0] } : {}),
-      } as any,
+      },
     });
     revalidatePath("/produk");
     revalidatePath(`/produk/${id}`);
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("updateProduct failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
@@ -184,7 +187,8 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
     await prisma.product.delete({ where: { id, storeId: store.id } });
     revalidatePath("/produk");
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("deleteProduct failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }

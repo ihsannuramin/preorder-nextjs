@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { PageSkeleton } from "@/components/shared/loading-skeleton";
 import { formatRelative } from "@/lib/utils/date";
+import { getStoreFinanceSummary } from "@/lib/utils/finance";
 import { ShoppingBag, Clock, CheckCircle, TrendingUp, Calendar, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -47,7 +48,7 @@ async function DashboardContent() {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
-  const [openCampaigns, pendingPayments, needVerification, recentOrders, ordersToday, revenueResult] =
+  const [openCampaigns, pendingPayments, needVerification, recentOrders, ordersToday, finance] =
     await Promise.all([
       prisma.campaign.count({ where: { storeId: store.id, status: "OPEN" } }),
       prisma.order.count({
@@ -68,18 +69,10 @@ async function DashboardContent() {
           createdAt: { gte: todayStart },
         },
       }),
-      prisma.order.aggregate({
-        where: {
-          campaign: { storeId: store.id },
-          status: { in: ["PAID", "PRODUCTION", "READY", "COMPLETED"] },
-        },
-        _sum: { totalAmount: true, totalHpp: true },
-      }),
+      getStoreFinanceSummary(store.id),
     ]);
 
-  const revenue = Number(revenueResult._sum.totalAmount ?? 0);
-  const totalHpp = Number(revenueResult._sum.totalHpp ?? 0);
-  const estimatedProfit = revenue - totalHpp;
+  const { revenue, totalHpp, profit: estimatedProfit } = finance;
 
   const metrics = [
     { label: "Periode PO Aktif", value: openCampaigns, icon: Calendar, color: "text-primary-600" },

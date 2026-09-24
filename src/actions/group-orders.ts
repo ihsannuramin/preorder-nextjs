@@ -3,7 +3,10 @@
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createLogger } from "@/lib/logger";
 import type { ActionResult } from "@/types";
+
+const logger = createLogger("action:group-orders");
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -49,7 +52,7 @@ export async function createGroupOrder(data: {
 
     return { success: true, data: { sessionCode } };
   } catch (e) {
-    console.error("createGroupOrder:", e);
+    logger.error("createGroupOrder failed", e);
     return { success: false, error: "Gagal membuat group order" };
   }
 }
@@ -130,7 +133,7 @@ export async function addMemberOrder(
 
     return { success: true, data: { memberName: memberName.trim() } };
   } catch (e) {
-    console.error("addMemberOrder:", e);
+    logger.error("addMemberOrder failed", e);
     return { success: false, error: "Gagal menambahkan pesanan" };
   }
 }
@@ -219,7 +222,7 @@ export async function uploadGroupPaymentProof(
 
     return { success: true, data: undefined };
   } catch (e) {
-    console.error("uploadGroupPaymentProof:", e);
+    logger.error("uploadGroupPaymentProof failed", e);
     return { success: false, error: "Gagal mengunggah bukti pembayaran" };
   }
 }
@@ -236,7 +239,7 @@ export async function closeGroupOrder(sessionCode: string): Promise<ActionResult
 
     return { success: true, data: undefined };
   } catch (e) {
-    console.error("closeGroupOrder:", e);
+    logger.error("closeGroupOrder failed", e);
     return { success: false, error: "Gagal menutup sesi" };
   }
 }
@@ -342,7 +345,7 @@ export async function updateGroupOrderStatus(
 
     return { success: true, data: undefined };
   } catch (e) {
-    console.error("updateGroupOrderStatus:", e);
+    logger.error("updateGroupOrderStatus failed", e);
     return { success: false, error: "Gagal update status" };
   }
 }

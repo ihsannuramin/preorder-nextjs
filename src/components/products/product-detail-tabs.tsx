@@ -13,22 +13,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { CurrencyInput } from "@/components/shared/currency-input";
-import { AdditionalCostSection } from "@/components/products/additional-cost-section";
-import { ProfitSimulator } from "@/components/products/profit-simulator";
-import { calculateIngredientsCost, calculateAdditionalCostsTotal } from "@/lib/utils/hpp";
+import { RecipeCostingSection } from "@/components/products/recipe-costing-section";
+import { calculateIngredientsCost } from "@/lib/utils/hpp";
+import { isRecipeSetupIncomplete } from "@/lib/utils/product-setup";
 import { CATEGORY_LABELS } from "@/lib/constants/categories";
 import { UNIT_LABELS } from "@/lib/constants/units";
 import { toDisplayUnit } from "@/lib/utils/units";
 import { updateProduct } from "@/actions/products";
 import type { getProduct, getProductionRecords } from "@/actions/products";
-import type { getAdditionalCosts } from "@/actions/additional-costs";
-import { FlaskConical, ImageIcon, Factory, History } from "lucide-react";
+import { FlaskConical, ImageIcon, Factory, History, AlertTriangle } from "lucide-react";
 import type { ProductStatus } from "@prisma/client";
 import { ProductImageUpload } from "@/app/(dashboard)/produk/[id]/product-image-upload";
 import { ProductStatusActions } from "@/app/(dashboard)/produk/[id]/product-status-actions";
 
 type ProductForTabs = NonNullable<Awaited<ReturnType<typeof getProduct>>>;
-type AdditionalCostItem = Awaited<ReturnType<typeof getAdditionalCosts>>[number];
 type ProductionRecord = Awaited<ReturnType<typeof getProductionRecords>>[number];
 
 const statusConfig: Record<ProductStatus, { label: string; variant: any }> = {
@@ -46,9 +44,6 @@ export function ProductDetailTabs({
   capacity: number;
   productionRecords: ProductionRecord[];
 }) {
-  const [additionalCosts, setAdditionalCosts] = useState<AdditionalCostItem[]>(
-    product.additionalCosts
-  );
   const isManual = product.costMode === "MANUAL";
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -86,9 +81,9 @@ export function ProductDetailTabs({
       ingredient: { averageCost: Number(ri.ingredient.averageCost) },
     }))
   );
-  const additionalCostTotal = calculateAdditionalCostsTotal(additionalCosts);
-  const hpp = (isManual ? Number(product.manualCostPrice ?? 0) : ingredientsCost) + additionalCostTotal;
+  const baseCost = isManual ? Number(product.manualCostPrice ?? 0) : ingredientsCost;
   const cfg = statusConfig[product.status];
+  const setupIncomplete = isRecipeSetupIncomplete(product);
 
   return (
     <Tabs defaultValue="overview">
@@ -100,6 +95,19 @@ export function ProductDetailTabs({
       </TabsList>
 
       <TabsContent value="overview" className="space-y-4">
+        {setupIncomplete && (
+          <div className="flex items-center justify-between gap-3 rounded-lg border-2 border-[#0D0D0D] bg-[#FFD400] p-3 shadow-sticker-sm">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 text-[#111111] flex-shrink-0 mt-0.5" />
+              <p className="text-sm font-semibold text-[#111111]">
+                Resep belum lengkap — lengkapi bahan baku & biaya tambahan supaya HPP akurat.
+              </p>
+            </div>
+            <Button variant="outline" size="sm" className="flex-shrink-0" asChild>
+              <Link href={`/produk/${product.id}/resep`}>Lengkapi</Link>
+            </Button>
+          </div>
+        )}
         <Card>
           <CardHeader>
             <div className="flex items-start justify-between">
@@ -226,12 +234,13 @@ export function ProductDetailTabs({
       )}
 
       <TabsContent value="costing" className="space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Total HPP</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {isManual ? (
+        <RecipeCostingSection
+          productId={product.id}
+          baseCost={baseCost}
+          initialAdditionalCosts={product.additionalCosts}
+          product={product}
+          baseCostRow={
+            isManual ? (
               <div className="space-y-1.5">
                 <Label htmlFor="manualCostPrice">Harga Modal</Label>
                 <div className="flex gap-2">
@@ -250,39 +259,9 @@ export function ProductDetailTabs({
                 <span className="text-muted-foreground">Biaya Bahan</span>
                 <CurrencyDisplay amount={ingredientsCost} size="sm" />
               </div>
-            )}
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Biaya Tambahan</span>
-              <CurrencyDisplay amount={additionalCostTotal} size="sm" />
-            </div>
-            <div className="flex justify-between text-sm font-semibold border-t pt-2">
-              <span>Total HPP</span>
-              <CurrencyDisplay amount={hpp} size="sm" className="text-primary-700" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Biaya Tambahan</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <AdditionalCostSection
-              productId={product.id}
-              initialCosts={additionalCosts}
-              onChange={setAdditionalCosts}
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Simulasi Harga &amp; Profit</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ProfitSimulator hpp={hpp} product={product} />
-          </CardContent>
-        </Card>
+            )
+          }
+        />
       </TabsContent>
 
       {!isManual && (

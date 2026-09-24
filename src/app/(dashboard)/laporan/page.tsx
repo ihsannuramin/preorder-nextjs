@@ -20,6 +20,12 @@ const reports = [
     format: "Excel",
   },
   {
+    title: "Laporan Pesanan (PDF)",
+    description: "Semua pesanan dalam format PDF siap cetak",
+    endpoint: "/api/export/pdf?type=orders",
+    format: "PDF",
+  },
+  {
     title: "Laporan Keuntungan",
     description: "Ringkasan pendapatan, HPP, dan keuntungan per kampanye",
     endpoint: "/api/export/csv?type=profit",

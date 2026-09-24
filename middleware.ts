@@ -37,7 +37,7 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  const DASHBOARD_ROOTS = [
+  const PROTECTED_ROOTS = [
     "/dashboard",
     "/toko",
     "/produk",
@@ -46,12 +46,14 @@ export async function middleware(request: NextRequest) {
     "/pesanan",
     "/keuntungan",
     "/laporan",
+    "/kalkulator-hpp",
+    "/admin",
   ];
-  const isDashboard = DASHBOARD_ROOTS.some(
+  const isProtected = PROTECTED_ROOTS.some(
     (root) => pathname === root || pathname.startsWith(root + "/"),
   );
 
-  if (isDashboard && !user) {
+  if (isProtected && !user) {
     return NextResponse.redirect(new URL("/masuk", request.url));
   }
 
@@ -66,6 +68,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_n  |_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

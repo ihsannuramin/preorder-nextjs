@@ -6,7 +6,10 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { generateProductionNeeds, checkAvailability } from "@/lib/utils/production";
 import { calculateHpp } from "@/lib/utils/hpp";
+import { createLogger } from "@/lib/logger";
 import type { ActionResult } from "@/types";
+
+const logger = createLogger("action:production");
 
 async function getStoreAndUser() {
   const supabase = await createClient();
@@ -110,7 +113,8 @@ export async function generateProductionSheet(
 
     revalidatePath(`/periode-po/${campaignId}/produksi`);
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("generateProductionSheet failed", err);
     return { success: false, error: "Terjadi kesalahan saat generate lembar produksi" };
   }
 }
@@ -234,7 +238,8 @@ export async function startProduction(
 
     revalidatePath(`/periode-po/${campaignId}/produksi`);
     return { success: true, data: { recordsCreated: recordOps.length } };
-  } catch {
+  } catch (err) {
+    logger.error("startProduction failed", err);
     return { success: false, error: "Terjadi kesalahan saat memulai produksi" };
   }
 }
@@ -250,7 +255,8 @@ export async function resetProductionSheet(campaignId: string): Promise<ActionRe
     await prisma.productionSheet.update({ where: { id: sheet.id }, data: { startedAt: null } });
     revalidatePath(`/periode-po/${campaignId}/produksi`);
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("resetProductionSheet failed", err);
     return { success: false, error: "Terjadi kesalahan saat mereset produksi" };
   }
 }

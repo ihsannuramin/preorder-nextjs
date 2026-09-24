@@ -5,18 +5,11 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/prisma";
+import { createLogger } from "@/lib/logger";
+import { PAYMENT_PROOF_BUCKET, extractPaymentProofPath } from "@/lib/utils/payment-proof";
 import type { ActionResult } from "@/types";
 
-const PAYMENT_PROOF_BUCKET =
-  process.env.NEXT_PUBLIC_STORAGE_BUCKET_PAYMENTS ?? "payment-proofs";
-
-function extractStoragePath(value: string): string {
-  if (!value.startsWith("http")) return value;
-  const marker = `/object/public/${PAYMENT_PROOF_BUCKET}/`;
-  const idx = value.indexOf(marker);
-  if (idx === -1) return value;
-  return decodeURIComponent(value.slice(idx + marker.length));
-}
+const logger = createLogger("action:payments");
 
 async function getStore() {
   const supabase = await createClient();
@@ -40,7 +33,8 @@ export async function approvePayment(orderId: string): Promise<ActionResult> {
     revalidatePath("/pesanan");
     revalidatePath(`/pesanan/${orderId}`);
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("approvePayment failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
@@ -58,13 +52,14 @@ export async function getPaymentProofUrl(
       return { success: false, error: "Bukti pembayaran tidak ditemukan" };
     }
 
-    const path = extractStoragePath(order.paymentProofUrl);
+    const path = extractPaymentProofPath(order.paymentProofUrl);
     const admin = createAdminClient();
     const { data, error } = await admin.storage
       .from(PAYMENT_PROOF_BUCKET)
       .createSignedUrl(path, 300);
 
     if (error || !data) {
+      logger.error("getPaymentProofUrl: signed URL creation failed", error);
       return { success: false, error: "Gagal memuat bukti pembayaran" };
     }
 
@@ -72,7 +67,8 @@ export async function getPaymentProofUrl(
       success: true,
       data: { url: data.signedUrl, isPdf: /\.pdf$/i.test(path) },
     };
-  } catch {
+  } catch (err) {
+    logger.error("getPaymentProofUrl failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
@@ -87,7 +83,8 @@ export async function approveGroupPayment(groupOrderId: string): Promise<ActionR
     revalidatePath("/pesanan/grup");
     revalidatePath(`/pesanan/grup/${groupOrderId}`);
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("approveGroupPayment failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
@@ -105,13 +102,14 @@ export async function getGroupPaymentProofUrl(
       return { success: false, error: "Bukti pembayaran tidak ditemukan" };
     }
 
-    const path = extractStoragePath(groupOrder.paymentProofUrl);
+    const path = extractPaymentProofPath(groupOrder.paymentProofUrl);
     const admin = createAdminClient();
     const { data, error } = await admin.storage
       .from(PAYMENT_PROOF_BUCKET)
       .createSignedUrl(path, 300);
 
     if (error || !data) {
+      logger.error("getGroupPaymentProofUrl: signed URL creation failed", error);
       return { success: false, error: "Gagal memuat bukti pembayaran" };
     }
 
@@ -119,7 +117,8 @@ export async function getGroupPaymentProofUrl(
       success: true,
       data: { url: data.signedUrl, isPdf: /\.pdf$/i.test(path) },
     };
-  } catch {
+  } catch (err) {
+    logger.error("getGroupPaymentProofUrl failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
@@ -141,7 +140,8 @@ export async function rejectGroupPayment(
     revalidatePath("/pesanan/grup");
     revalidatePath(`/pesanan/grup/${groupOrderId}`);
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("rejectGroupPayment failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
@@ -163,7 +163,8 @@ export async function rejectPayment(
     revalidatePath("/pesanan");
     revalidatePath(`/pesanan/${orderId}`);
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("rejectPayment failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }

@@ -6,7 +6,10 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { stockPurchaseSchema, stockAdjustmentSchema } from "@/lib/validations/ingredient";
 import { applyPurchase } from "@/lib/utils/stock";
+import { createLogger } from "@/lib/logger";
 import type { ActionResult } from "@/types";
+
+const logger = createLogger("action:stock-movements");
 
 async function getStoreAndUser() {
   const supabase = await createClient();
@@ -63,7 +66,8 @@ export async function recordStockPurchase(
     revalidatePath("/bahan-baku");
     revalidatePath(`/bahan-baku/${ingredientId}`);
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("recordStockPurchase failed", err);
     return { success: false, error: "Terjadi kesalahan saat mencatat pembelian" };
   }
 }
@@ -116,7 +120,8 @@ export async function recordStockAdjustment(
     revalidatePath("/bahan-baku");
     revalidatePath(`/bahan-baku/${ingredientId}`);
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("recordStockAdjustment failed", err);
     return { success: false, error: "Terjadi kesalahan saat menyesuaikan stok" };
   }
 }

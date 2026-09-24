@@ -6,8 +6,11 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { storeSchema } from "@/lib/validations/store";
 import { isReservedSlug } from "@/lib/utils/slug";
+import { createLogger } from "@/lib/logger";
 import type { ActionResult } from "@/types";
 import type { Store } from "@prisma/client";
+
+const logger = createLogger("action:store");
 
 async function getCurrentUser() {
   const supabase = await createClient();
@@ -103,7 +106,8 @@ export async function createOrUpdateStore(
       revalidatePath("/toko");
       return { success: true, data: store };
     }
-  } catch (e) {
+  } catch (err) {
+    logger.error("createOrUpdateStore failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }

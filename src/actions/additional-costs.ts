@@ -4,7 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { createLogger } from "@/lib/logger";
 import type { ActionResult } from "@/types";
+
+const logger = createLogger("action:additional-costs");
 
 async function getStore() {
   const supabase = await createClient();
@@ -47,7 +50,8 @@ export async function addAdditionalCost(
     revalidatePath(`/produk/${productId}/resep`);
     revalidatePath(`/produk/${productId}`);
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("addAdditionalCost failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
@@ -71,7 +75,8 @@ export async function updateAdditionalCost(
     revalidatePath(`/produk/${cost.productId}/resep`);
     revalidatePath(`/produk/${cost.productId}`);
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("updateAdditionalCost failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
@@ -88,7 +93,8 @@ export async function removeAdditionalCost(id: string): Promise<ActionResult> {
     revalidatePath(`/produk/${cost.productId}/resep`);
     revalidatePath(`/produk/${cost.productId}`);
     return { success: true, data: undefined };
-  } catch {
+  } catch (err) {
+    logger.error("removeAdditionalCost failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }
