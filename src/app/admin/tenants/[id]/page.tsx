@@ -8,26 +8,8 @@ import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { TenantStatusActions } from "@/components/admin/suspend-tenant-dialog";
 import { formatDate, formatDateTime } from "@/lib/utils/date";
 import { ExternalLink } from "lucide-react";
+import { ORDER_STATUS, CAMPAIGN_STATUS } from "@/lib/constants/status";
 import type { OrderStatus, CampaignStatus } from "@prisma/client";
-
-const orderStatusConfig: Record<OrderStatus, { label: string; variant: any }> = {
-  PENDING_PAYMENT: { label: "Menunggu Bayar", variant: "secondary" },
-  PAYMENT_REVIEW: { label: "Verifikasi", variant: "warning" },
-  PAID: { label: "Lunas", variant: "success" },
-  PRODUCTION: { label: "Produksi", variant: "info" },
-  READY: { label: "Siap Kirim", variant: "default" },
-  COMPLETED: { label: "Selesai", variant: "outline" },
-  CANCELLED: { label: "Batal", variant: "destructive" },
-};
-
-const campaignStatusConfig: Record<CampaignStatus, { label: string; variant: any }> = {
-  DRAFT: { label: "Draft", variant: "secondary" },
-  OPEN: { label: "Buka", variant: "success" },
-  CLOSED: { label: "Tutup", variant: "warning" },
-  PRODUCTION: { label: "Produksi", variant: "info" },
-  COMPLETED: { label: "Selesai", variant: "outline" },
-  CANCELLED: { label: "Batal", variant: "destructive" },
-};
 
 export default async function AdminTenantDetailPage({
   params,
@@ -117,7 +99,7 @@ export default async function AdminTenantDetailPage({
               <CurrencyDisplay
                 amount={finance.profit}
                 size="sm"
-                className={`font-bold ${finance.profit >= 0 ? "text-success" : "text-error"}`}
+                className={`font-bold ${finance.profit >= 0 ? "text-success-700" : "text-error"}`}
               />
             </div>
           </CardContent>
@@ -156,7 +138,7 @@ export default async function AdminTenantDetailPage({
             ) : (
               <div className="space-y-2">
                 {recentOrders.map((o) => {
-                  const cfg = orderStatusConfig[o.status];
+                  const cfg = ORDER_STATUS[o.status];
                   return (
                     <div key={o.id} className="flex items-center justify-between py-2 border-b last:border-0">
                       <div className="min-w-0">
@@ -185,7 +167,7 @@ export default async function AdminTenantDetailPage({
             ) : (
               <div className="space-y-2">
                 {recentCampaigns.map((c) => {
-                  const cfg = campaignStatusConfig[c.status];
+                  const cfg = CAMPAIGN_STATUS[c.status];
                   return (
                     <div key={c.id} className="flex items-center justify-between py-2 border-b last:border-0">
                       <div className="min-w-0">

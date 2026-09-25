@@ -11,17 +11,8 @@ import { OrderStatusActions } from "./order-status-actions";
 import { PaymentVerification } from "./payment-verification";
 import { WhatsAppActions } from "./whatsapp-actions";
 import { ArrowLeft, User, MapPin, Phone, ShoppingBag } from "lucide-react";
+import { ORDER_STATUS } from "@/lib/constants/status";
 import type { OrderStatus } from "@prisma/client";
-
-const statusConfig: Record<OrderStatus, { label: string; variant: any }> = {
-  PENDING_PAYMENT: { label: "Menunggu Pembayaran", variant: "secondary" },
-  PAYMENT_REVIEW: { label: "Menunggu Verifikasi", variant: "warning" },
-  PAID: { label: "Lunas", variant: "success" },
-  PRODUCTION: { label: "Sedang Diproduksi", variant: "info" },
-  READY: { label: "Siap Dikirim", variant: "default" },
-  COMPLETED: { label: "Selesai", variant: "outline" },
-  CANCELLED: { label: "Dibatalkan", variant: "destructive" },
-};
 
 export default async function PesananDetailPage({
   params,
@@ -32,7 +23,7 @@ export default async function PesananDetailPage({
   const order = await getOrder(id);
   if (!order) notFound();
 
-  const cfg = statusConfig[order.status];
+  const cfg = ORDER_STATUS[order.status];
 
   return (
     <>
@@ -49,7 +40,7 @@ export default async function PesananDetailPage({
         <Card>
           <CardContent className="pt-4 flex flex-wrap items-center gap-3 justify-between">
             <div className="flex items-center gap-3">
-              <Badge variant={cfg.variant} className="text-sm px-3 py-1">{cfg.label}</Badge>
+              <Badge variant={cfg.variant} className="text-sm px-3 py-1">{cfg.longLabel}</Badge>
               <p className="text-sm text-muted-foreground">
                 {formatDateTime(order.createdAt)}
               </p>
@@ -74,10 +65,10 @@ export default async function PesananDetailPage({
         )}
 
         {order.rejectionReason && (
-          <Card className="border-red-200 bg-red-50">
+          <Card className="border-error-200 bg-error-50">
             <CardContent className="pt-4">
-              <p className="text-sm font-semibold text-red-700">Alasan Penolakan Pembayaran</p>
-              <p className="text-sm text-red-600">{order.rejectionReason}</p>
+              <p className="text-sm font-semibold text-error-700">Alasan Penolakan Pembayaran</p>
+              <p className="text-sm text-error">{order.rejectionReason}</p>
             </CardContent>
           </Card>
         )}

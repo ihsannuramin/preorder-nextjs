@@ -70,7 +70,7 @@ export function PenyesuaianClient({ ingredient }: { ingredient: SerializedIngred
                 onChange={(e) => setNewStock(e.target.value)}
                 required
               />
-              <p className={`text-xs ${delta >= 0 ? "text-success" : "text-error"}`}>
+              <p className={`text-xs ${delta >= 0 ? "text-success-700" : "text-error"}`}>
                 Perubahan: {delta >= 0 ? "+" : ""}{delta} {unitLabel}
               </p>
             </div>

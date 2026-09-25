@@ -41,7 +41,7 @@ export function DeleteProductButton({ productId }: { productId: string }) {
         open={open}
         onOpenChange={setOpen}
         title="Hapus Produk"
-        description="Tindakan ini tidak bisa dibatalkan. Produk beserta semua varian dan resepnya akan dihapus permanen."
+        description="Tindakan ini tidak bisa dibatalkan. Produk beserta komposisi bahannya akan dihapus permanen."
         confirmLabel="Hapus"
         variant="destructive"
         onConfirm={handleConfirm}

@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { getPublicGroupOrder } from "@/actions/group-orders";
+import { PublicNotice } from "@/components/public/public-notice";
 import { RingkasanClient } from "./ringkasan-client";
 
 export default async function RingkasanPage({
@@ -10,11 +11,13 @@ export default async function RingkasanPage({
   const { slug, campaignId, sessionCode } = await params;
   const groupOrder = await getPublicGroupOrder(sessionCode);
 
-  if (!groupOrder) {
+  const store = groupOrder?.campaign?.store;
+  if (!groupOrder || !store || store.slug !== slug || groupOrder.campaignId !== campaignId) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <p className="text-muted-foreground">Sesi tidak ditemukan.</p>
-      </div>
+      <PublicNotice
+        title="Link pesanan grup tidak ditemukan"
+        message="Cek lagi link pesanan grupmu, ya."
+      />
     );
   }
 
@@ -35,6 +38,13 @@ export default async function RingkasanPage({
     paymentProofUrl: groupOrder.paymentProofUrl,
     rejectionReason: groupOrder.rejectionReason,
     campaign: { id: groupOrder.campaign!.id, name: groupOrder.campaign!.name },
+    store: {
+      name: store.name,
+      whatsapp: store.whatsapp,
+      logoUrl: store.logoUrl,
+      brandColor: store.brandColor,
+      paymentMethods: store.paymentMethods,
+    },
   };
 
   const members = (groupOrder.memberOrders ?? []).map((m) => ({

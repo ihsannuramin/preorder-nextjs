@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       "Total (Rp)": Number(o.totalAmount),
       "HPP (Rp)": Number(o.totalHpp),
       "Status": o.status,
-      "Kampanye": o.campaign.name,
+      "Periode PO": o.campaign.name,
       "Tanggal": o.createdAt.toISOString().split("T")[0],
     }));
 

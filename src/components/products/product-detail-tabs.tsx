@@ -21,7 +21,7 @@ import { UNIT_LABELS } from "@/lib/constants/units";
 import { toDisplayUnit } from "@/lib/utils/units";
 import { updateProduct } from "@/actions/products";
 import type { getProduct, getProductionRecords } from "@/actions/products";
-import { FlaskConical, ImageIcon, Factory, History, AlertTriangle } from "lucide-react";
+import { Boxes, ImageIcon, Factory, History, AlertTriangle } from "lucide-react";
 import type { ProductStatus } from "@prisma/client";
 import { ProductImageUpload } from "@/app/(dashboard)/produk/[id]/product-image-upload";
 import { ProductStatusActions } from "@/app/(dashboard)/produk/[id]/product-status-actions";
@@ -30,7 +30,7 @@ type ProductForTabs = NonNullable<Awaited<ReturnType<typeof getProduct>>>;
 type ProductionRecord = Awaited<ReturnType<typeof getProductionRecords>>[number];
 
 const statusConfig: Record<ProductStatus, { label: string; variant: any }> = {
-  DRAFT: { label: "Draft", variant: "secondary" },
+  DRAFT: { label: "Draf", variant: "secondary" },
   PUBLISHED: { label: "Terbit", variant: "success" },
   ARCHIVED: { label: "Arsip", variant: "outline" },
 };
@@ -89,18 +89,18 @@ export function ProductDetailTabs({
     <Tabs defaultValue="overview">
       <TabsList>
         <TabsTrigger value="overview">Overview</TabsTrigger>
-        {!isManual && <TabsTrigger value="recipe">Resep</TabsTrigger>}
-        <TabsTrigger value="costing">HPP</TabsTrigger>
+        {!isManual && <TabsTrigger value="recipe">Komposisi Bahan</TabsTrigger>}
+        <TabsTrigger value="costing">Modal (HPP)</TabsTrigger>
         {!isManual && <TabsTrigger value="production">Produksi</TabsTrigger>}
       </TabsList>
 
       <TabsContent value="overview" className="space-y-4">
         {setupIncomplete && (
-          <div className="flex items-center justify-between gap-3 rounded-lg border-2 border-[#0D0D0D] bg-[#FFD400] p-3 shadow-sticker-sm">
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-primary-200 bg-primary-50 p-3">
             <div className="flex items-start gap-2">
-              <AlertTriangle className="h-4 w-4 text-[#111111] flex-shrink-0 mt-0.5" />
-              <p className="text-sm font-semibold text-[#111111]">
-                Resep belum lengkap — lengkapi bahan baku & biaya tambahan supaya HPP akurat.
+              <AlertTriangle className="h-4 w-4 text-foreground flex-shrink-0 mt-0.5" />
+              <p className="text-sm font-semibold text-foreground">
+                Komposisi bahan belum lengkap. Lengkapi bahan & biaya tambahan supaya modal per produk (HPP) akurat.
               </p>
             </div>
             <Button variant="outline" size="sm" className="flex-shrink-0" asChild>
@@ -113,7 +113,7 @@ export function ProductDetailTabs({
             <div className="flex items-start justify-between">
               <div>
                 <CardTitle>{product.name}</CardTitle>
-                <p className="text-sm text-[#9A9A9A] mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   {CATEGORY_LABELS[product.category]}
                 </p>
               </div>
@@ -123,7 +123,7 @@ export function ProductDetailTabs({
           <CardContent className="space-y-4">
             {galleryImages.length > 0 && (
               <div className="space-y-2">
-                <div className="relative w-full aspect-video rounded-lg border-2 border-[#0D0D0D] overflow-hidden shadow-sticker bg-[#F7F7F7]">
+                <div className="relative w-full aspect-video rounded-lg border border-border overflow-hidden shadow-sm bg-muted">
                   <Image
                     src={galleryImages[activeImage] ?? galleryImages[0]}
                     alt={product.name}
@@ -141,7 +141,7 @@ export function ProductDetailTabs({
                         type="button"
                         onClick={() => setActiveImage(i)}
                         className={`relative flex-shrink-0 w-14 h-14 rounded-lg border-2 overflow-hidden transition-all ${
-                          i === activeImage ? "border-[#0D0D0D] shadow-sticker-sm" : "border-[#E5E7EB]"
+                          i === activeImage ? "border-border shadow-sm" : "border-border"
                         }`}
                       >
                         <Image src={img} alt="" fill className="object-cover" sizes="56px" />
@@ -152,14 +152,14 @@ export function ProductDetailTabs({
               </div>
             )}
             {product.description && (
-              <p className="text-sm text-[#9A9A9A]">{product.description}</p>
+              <p className="text-sm text-muted-foreground">{product.description}</p>
             )}
-            <div className="rounded-lg border-2 border-[#0D0D0D] bg-[#F7F7F7] p-3 text-center shadow-sticker-sm">
-              <p className="text-xs text-[#9A9A9A] mb-1 font-medium">Harga Jual</p>
+            <div className="rounded-lg border border-border bg-muted p-3 text-center shadow-sm">
+              <p className="text-xs text-muted-foreground mb-1 font-medium">Harga Jual</p>
               <CurrencyDisplay
                 amount={Number(product.basePrice)}
                 size="sm"
-                className="font-bold text-[#111111]"
+                className="font-bold text-foreground"
               />
             </div>
           </CardContent>
@@ -197,18 +197,18 @@ export function ProductDetailTabs({
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
-                <FlaskConical className="h-4 w-4" />
-                Resep &amp; Bahan Baku
+                <Boxes className="h-4 w-4" />
+                Komposisi Bahan
               </CardTitle>
               <Button variant="outline" size="sm" asChild>
-                <Link href={`/produk/${product.id}/resep`}>Edit Resep Lengkap</Link>
+                <Link href={`/produk/${product.id}/resep`}>Atur Komposisi Bahan</Link>
               </Button>
             </div>
           </CardHeader>
           <CardContent>
             {product.recipeItems.length === 0 ? (
-              <p className="text-sm text-[#9A9A9A] text-center py-4">
-                Belum ada resep. Tambahkan bahan baku untuk menghitung HPP.
+              <p className="text-sm text-muted-foreground text-center py-4">
+                Belum ada komposisi bahan. Tambahkan bahan supaya modal per produk (HPP) terhitung.
               </p>
             ) : (
               <div className="space-y-2">
@@ -217,10 +217,10 @@ export function ProductDetailTabs({
                   return (
                     <div
                       key={ri.id}
-                      className="flex justify-between py-2 border-b border-[#E5E7EB] last:border-0"
+                      className="flex justify-between py-2 border-b border-border last:border-0"
                     >
-                      <span className="text-sm text-[#111111]">{ri.ingredient.name}</span>
-                      <span className="text-sm text-[#9A9A9A]">
+                      <span className="text-sm text-foreground">{ri.ingredient.name}</span>
+                      <span className="text-sm text-muted-foreground">
                         {display.value} {UNIT_LABELS[display.unit]}
                       </span>
                     </div>
@@ -274,13 +274,13 @@ export function ProductDetailTabs({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="rounded-lg border-2 border-[#0D0D0D] bg-[#F7F7F7] p-4 text-center">
-              <p className="text-xs text-[#9A9A9A] mb-1">Bisa Produksi</p>
-              <p className="font-bold text-2xl text-[#111111]">
+            <div className="rounded-lg border border-border bg-muted p-4 text-center">
+              <p className="text-xs text-muted-foreground mb-1">Bisa Produksi</p>
+              <p className="font-bold text-2xl text-foreground">
                 {Number.isFinite(capacity) ? `${capacity} pcs` : "—"}
               </p>
               {!Number.isFinite(capacity) && (
-                <p className="text-xs text-[#9A9A9A] mt-1">Belum ada resep</p>
+                <p className="text-xs text-muted-foreground mt-1">Belum ada komposisi bahan</p>
               )}
             </div>
           </CardContent>

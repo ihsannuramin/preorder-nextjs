@@ -9,18 +9,16 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-[#FF3B6B] text-white border-2 border-[#0D0D0D] shadow-sticker hover:bg-[#FFD400] hover:text-[#111111] active:shadow-none active:translate-x-[3px] active:translate-y-[3px]",
+          "bg-primary text-white shadow-sm hover:bg-primary-700 active:bg-primary-800",
         secondary:
-          "bg-white text-[#111111] border-2 border-[#0D0D0D] shadow-sticker hover:bg-[#F7F7F7] active:shadow-none active:translate-x-[3px] active:translate-y-[3px]",
+          "bg-white text-foreground border border-border shadow-sm hover:bg-muted hover:border-border-strong",
         outline:
-          "bg-white text-[#111111] border border-[#E5E7EB] hover:bg-[#F7F7F7] hover:border-[#0D0D0D]",
+          "bg-white text-foreground border border-border hover:bg-muted hover:border-primary-300",
         ghost:
-          "bg-transparent text-[#9A9A9A] hover:bg-[#F7F7F7] hover:text-[#111111]",
-        link: "bg-transparent text-[#9A9A9A] hover:text-[#111111] underline-offset-4 hover:underline p-0 h-auto",
+          "bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground",
+        link: "bg-transparent text-primary-600 hover:text-primary-700 underline-offset-4 hover:underline p-0 h-auto",
         destructive:
-          "bg-[#FF3B6B] text-white border-2 border-[#0D0D0D] shadow-sticker hover:bg-[#F0004A] active:shadow-none active:translate-x-[3px] active:translate-y-[3px]",
-        yellow:
-          "bg-[#FFD400] text-[#111111] border-2 border-[#0D0D0D] shadow-sticker hover:bg-[#FF3B6B] hover:text-white active:shadow-none active:translate-x-[3px] active:translate-y-[3px]",
+          "bg-error text-white shadow-sm hover:bg-error-700",
       },
       size: {
         default: "h-12 px-5 py-2 rounded-button text-sm",

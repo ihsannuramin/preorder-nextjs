@@ -43,9 +43,9 @@ export function ProductStatusActions({ productId, status }: Props) {
             variant="outline"
             className="w-full"
             disabled={isPending}
-            onClick={() => update("DRAFT", "dijadikan Draft")}
+            onClick={() => update("DRAFT", "dijadikan draf")}
           >
-            {isPending ? "Memproses..." : "Jadikan Draft"}
+            {isPending ? "Memproses..." : "Jadikan Draf"}
           </Button>
           <Button
             variant="outline"
@@ -71,9 +71,9 @@ export function ProductStatusActions({ productId, status }: Props) {
             variant="outline"
             className="w-full"
             disabled={isPending}
-            onClick={() => update("DRAFT", "dijadikan Draft")}
+            onClick={() => update("DRAFT", "dijadikan draf")}
           >
-            {isPending ? "Memproses..." : "Jadikan Draft"}
+            {isPending ? "Memproses..." : "Jadikan Draf"}
           </Button>
         </>
       )}

@@ -141,7 +141,7 @@ export function AddIngredientDialog({
         setSelectedId(result.data.id);
         setQuantityUnit(getDefaultInputUnit(newUnit as Unit));
         setView("search");
-        toast.success("Bahan baku dibuat!");
+        toast.success("Bahan dibuat!");
         setTimeout(() => quantityInputRef.current?.focus(), 50);
       } else {
         toast.error(result.error);
@@ -164,14 +164,14 @@ export function AddIngredientDialog({
         {view === "search" ? (
           <>
             <DialogHeader>
-              <DialogTitle>Pilih Bahan Baku</DialogTitle>
+              <DialogTitle>Pilih Bahan</DialogTitle>
             </DialogHeader>
             <div className="space-y-3">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 <Input
                   className="pl-9"
-                  placeholder="Cari bahan baku..."
+                  placeholder="Cari bahan atau material..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -232,7 +232,7 @@ export function AddIngredientDialog({
                                 </Select>
                               )}
                               <Button onClick={handleAddToRecipe} disabled={isPending}>
-                                Tambah ke Resep
+                                Tambah ke Komposisi
                               </Button>
                             </div>
                             {convertedPreview !== null && quantityUnit !== ing.unit && (

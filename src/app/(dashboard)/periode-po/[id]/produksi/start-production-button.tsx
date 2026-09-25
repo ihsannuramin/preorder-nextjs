@@ -55,7 +55,7 @@ export function StartProductionButton({
           open={confirmReset}
           onOpenChange={setConfirmReset}
           title="Reset Produksi"
-          description="Mengulang produksi akan menghitung ulang kebutuhan bahan dari SEMUA pesanan yang lunas di kampanye ini, termasuk yang sudah diproduksi sebelumnya. Pastikan Anda tahu apa yang dilakukan."
+          description="Mengulang produksi akan menghitung ulang kebutuhan bahan dari SEMUA pesanan yang lunas di PO ini, termasuk yang sudah diproduksi sebelumnya. Lanjutkan hanya kalau kamu memang mau menghitung ulang."
           confirmLabel="Reset"
           variant="destructive"
           onConfirm={handleReset}

@@ -9,16 +9,8 @@ import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { formatDate } from "@/lib/utils/date";
 import { CampaignStatusActions } from "./campaign-status-actions";
 import { ArrowLeft, ShoppingBag, Package, Factory } from "lucide-react";
+import { CAMPAIGN_STATUS } from "@/lib/constants/status";
 import type { CampaignStatus } from "@prisma/client";
-
-const statusConfig: Record<CampaignStatus, { label: string; variant: any }> = {
-  DRAFT: { label: "Draft", variant: "secondary" },
-  OPEN: { label: "Buka", variant: "success" },
-  CLOSED: { label: "Tutup", variant: "warning" },
-  PRODUCTION: { label: "Produksi", variant: "info" },
-  COMPLETED: { label: "Selesai", variant: "outline" },
-  CANCELLED: { label: "Batal", variant: "destructive" },
-};
 
 export default async function CampaignDetailPage({
   params,
@@ -29,7 +21,7 @@ export default async function CampaignDetailPage({
   const campaign = await getCampaign(id);
   if (!campaign) notFound();
 
-  const cfg = statusConfig[campaign.status];
+  const cfg = CAMPAIGN_STATUS[campaign.status];
   const totalRevenue = campaign.orders.reduce(
     (sum, o) => sum + Number(o.totalAmount),
     0
@@ -51,7 +43,7 @@ export default async function CampaignDetailPage({
         <Card>
           <CardContent className="pt-4 flex flex-wrap gap-3 items-center justify-between">
             <div className="flex items-center gap-3">
-              <Badge variant={cfg.variant} className="text-sm px-3 py-1">{cfg.label}</Badge>
+              <Badge variant={cfg.variant} className="text-sm px-3 py-1">{cfg.longLabel}</Badge>
               <p className="text-sm text-muted-foreground">
                 {formatDate(campaign.openDate)} — {formatDate(campaign.closeDate)}
               </p>
@@ -80,7 +72,7 @@ export default async function CampaignDetailPage({
               <CurrencyDisplay
                 amount={totalRevenue - totalHpp}
                 size="sm"
-                className="font-bold text-success"
+                className="font-bold text-success-700"
               />
             </CardContent>
           </Card>
@@ -121,7 +113,7 @@ export default async function CampaignDetailPage({
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Lembar produksi otomatis dihasilkan saat periode PO ditutup.
+                Setelah PO ditutup, buka lembar produksi buat tahu bahan yang harus dibeli dari pesanan yang udah lunas.
               </p>
             </CardContent>
           </Card>

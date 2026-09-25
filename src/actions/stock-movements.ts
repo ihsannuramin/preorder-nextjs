@@ -32,7 +32,7 @@ export async function recordStockPurchase(
     const ingredient = await prisma.ingredient.findFirst({
       where: { id: ingredientId, storeId: store.id },
     });
-    if (!ingredient) return { success: false, error: "Bahan baku tidak ditemukan" };
+    if (!ingredient) return { success: false, error: "Bahan tidak ditemukan" };
 
     const raw = {
       purchaseQuantity: formData.get("purchaseQuantity"),
@@ -81,7 +81,7 @@ export async function recordStockAdjustment(
     const ingredient = await prisma.ingredient.findFirst({
       where: { id: ingredientId, storeId: store.id },
     });
-    if (!ingredient) return { success: false, error: "Bahan baku tidak ditemukan" };
+    if (!ingredient) return { success: false, error: "Bahan tidak ditemukan" };
 
     const raw = {
       quantityChange: formData.get("quantityChange"),

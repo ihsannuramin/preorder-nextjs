@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { publicStoreSelect } from "@/lib/public-store";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
@@ -9,6 +10,7 @@ import { calculateHpp } from "@/lib/utils/hpp";
 import { formatOrderNumber, isOrderNumberConflict } from "@/lib/utils/order-number";
 import { createLogger } from "@/lib/logger";
 import type { ActionResult } from "@/types";
+import { cleanPhone } from "@/lib/utils/whatsapp";
 
 const logger = createLogger("action:orders");
 
@@ -111,9 +113,9 @@ export async function createPublicOrder(data: {
       include: { store: true },
     });
 
-    if (!campaign) return { success: false, error: "Periode PO tidak ditemukan" };
-    if (campaign.status !== "OPEN") return { success: false, error: "Periode PO sudah tidak aktif" };
-    if (new Date() > campaign.closeDate) return { success: false, error: "Periode PO sudah berakhir" };
+    if (!campaign) return { success: false, error: "PO ini tidak ditemukan. Cek lagi link dari toko, ya." };
+    if (campaign.status !== "OPEN") return { success: false, error: "PO ini sudah tutup. Chat toko buat tahu PO berikutnya." };
+    if (new Date() > campaign.closeDate) return { success: false, error: "PO ini sudah tutup. Chat toko buat tahu PO berikutnya." };
 
     let totalAmount = 0;
     let totalHpp = 0;
@@ -192,7 +194,11 @@ export async function getPublicOrder(orderId: string) {
     where: { id: orderId },
     include: {
       items: true,
-      campaign: { include: { store: { select: { name: true, slug: true, whatsapp: true } } } },
+      campaign: {
+        include: {
+          store: { select: publicStoreSelect },
+        },
+      },
     },
   });
   if (!order) return null;
@@ -215,6 +221,41 @@ export async function getPublicOrder(orderId: string) {
     })),
     store: order.campaign.store,
   };
+}
+
+/**
+ * Pelanggan yang kehilangan link cek status bisa menemukan pesanannya lagi
+ * dengan nomor pesanan + nomor HP. Keduanya harus cocok supaya nomor pesanan
+ * saja tidak cukup untuk melihat data pesanan orang lain.
+ */
+export async function findPublicOrder(
+  slug: string,
+  orderNumber: string,
+  phone: string,
+): Promise<ActionResult<{ orderId: string }>> {
+  const notFound = {
+    success: false as const,
+    error: "Pesanan nggak ketemu. Cek lagi nomor pesanan dan nomor HP yang kamu pakai waktu pesan.",
+  };
+  try {
+    const number = orderNumber.trim().toUpperCase();
+    const inputPhone = cleanPhone(phone);
+    if (!number || inputPhone.length < 8) return notFound;
+
+    const store = await prisma.store.findUnique({ where: { slug }, select: { id: true } });
+    if (!store) return notFound;
+
+    const order = await prisma.order.findUnique({
+      where: { storeId_orderNumber: { storeId: store.id, orderNumber: number } },
+      select: { id: true, customerPhone: true },
+    });
+    if (!order || cleanPhone(order.customerPhone) !== inputPhone) return notFound;
+
+    return { success: true, data: { orderId: order.id } };
+  } catch (err) {
+    logger.error("findPublicOrder failed", err);
+    return { success: false, error: "Terjadi kesalahan, coba lagi sebentar lagi." };
+  }
 }
 
 export async function updateOrderStatus(

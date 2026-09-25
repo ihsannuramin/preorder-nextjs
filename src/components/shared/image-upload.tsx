@@ -74,7 +74,7 @@ export function ImageUpload({
   return (
     <div className={cn("w-full", className)}>
       {value ? (
-        <div className="relative group w-full aspect-square rounded-lg border-2 border-[#0D0D0D] shadow-sticker overflow-hidden bg-[#F7F7F7]">
+        <div className="relative group w-full aspect-square rounded-lg border border-border shadow-sm overflow-hidden bg-muted">
           <Image
             src={value}
             alt="Foto produk"
@@ -87,7 +87,7 @@ export function ImageUpload({
               type="button"
               onClick={() => inputRef.current?.click()}
               disabled={isDisabled}
-              className="bg-[#FFD400] border-2 border-[#0D0D0D] text-[#111111] rounded-full px-3 py-1.5 text-xs font-bold shadow-sticker-sm hover:bg-white transition-colors disabled:opacity-50"
+              className="bg-white border border-border text-foreground rounded-full px-3 py-1.5 text-xs font-bold shadow-sm hover:bg-muted transition-colors disabled:opacity-50"
             >
               Ganti
             </button>
@@ -95,7 +95,7 @@ export function ImageUpload({
               type="button"
               onClick={() => onChange("")}
               disabled={isDisabled}
-              className="bg-[#FF3B6B] border-2 border-[#0D0D0D] text-white rounded-full px-3 py-1.5 text-xs font-bold shadow-sticker-sm hover:bg-[#F0004A] transition-colors disabled:opacity-50"
+              className="bg-error border border-error text-white rounded-full px-3 py-1.5 text-xs font-bold shadow-sm hover:bg-error-700 transition-colors disabled:opacity-50"
             >
               Hapus
             </button>
@@ -112,27 +112,27 @@ export function ImageUpload({
           className={cn(
             "w-full aspect-square flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed transition-all duration-150 cursor-pointer select-none",
             dragging
-              ? "border-solid border-[#0D0D0D] bg-[#FFD400] shadow-sticker scale-[1.02]"
-              : "border-[#0D0D0D] bg-[#F7F7F7] hover:bg-[#FFD400] hover:border-solid hover:shadow-sticker",
+              ? "border-solid border-primary bg-primary-50 scale-[1.02]"
+              : "border-border-strong bg-muted hover:bg-primary-50 hover:border-primary hover:border-solid",
             isDisabled && "opacity-50 cursor-not-allowed"
           )}
         >
           {uploading ? (
             <>
-              <div className="w-12 h-12 rounded-full bg-[#FFD400] border-2 border-[#0D0D0D] flex items-center justify-center shadow-sticker-sm">
-                <Loader2 className="h-5 w-5 text-[#111111] animate-spin" />
+              <div className="w-12 h-12 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center">
+                <Loader2 className="h-5 w-5 text-foreground animate-spin" />
               </div>
-              <p className="text-xs font-bold text-[#111111]">Mengupload...</p>
+              <p className="text-xs font-bold text-foreground">Mengupload...</p>
             </>
           ) : (
             <>
-              <div className="w-12 h-12 rounded-full bg-white border-2 border-[#0D0D0D] flex items-center justify-center shadow-sticker-sm">
-                <Upload className="h-5 w-5 text-[#111111]" />
+              <div className="w-12 h-12 rounded-full bg-white border border-border flex items-center justify-center shadow-sm">
+                <Upload className="h-5 w-5 text-foreground" />
               </div>
               <div className="text-center px-2">
-                <p className="text-xs font-bold text-[#111111]">Upload Foto Produk</p>
-                <p className="text-[11px] text-[#9A9A9A] mt-0.5">atau drag &amp; drop di sini</p>
-                <p className="text-[10px] text-[#9A9A9A] mt-1">JPG, PNG, WebP · maks 5MB</p>
+                <p className="text-xs font-bold text-foreground">Upload Foto Produk</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">atau drag &amp; drop di sini</p>
+                <p className="text-[10px] text-muted-foreground mt-1">JPG, PNG, WebP · maks 5MB</p>
               </div>
             </>
           )}

@@ -87,7 +87,7 @@ export function MultiImageUpload({
         {value.map((url, index) => (
           <div
             key={url + index}
-            className="relative group aspect-square rounded-lg border-2 border-[#0D0D0D] shadow-sticker-sm overflow-hidden bg-[#F7F7F7]"
+            className="relative group aspect-square rounded-lg border border-border shadow-sm overflow-hidden bg-muted"
           >
             <Image
               src={url}
@@ -97,7 +97,7 @@ export function MultiImageUpload({
               sizes="120px"
             />
             {index === 0 && (
-              <span className="absolute top-1 left-1 bg-[#FFD400] border border-[#0D0D0D] text-[#111111] text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+              <span className="absolute top-1 left-1 bg-primary border border-primary text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
                 Sampul
               </span>
             )}
@@ -119,22 +119,22 @@ export function MultiImageUpload({
             disabled={isDisabled}
             onClick={() => inputRef.current?.click()}
             className={cn(
-              "aspect-square flex flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-[#0D0D0D] bg-[#F7F7F7] hover:bg-[#FFD400] hover:border-solid transition-all duration-150",
+              "aspect-square flex flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border-strong bg-muted hover:bg-primary-50 hover:border-primary hover:border-solid transition-all duration-150",
               isDisabled && "opacity-50 cursor-not-allowed"
             )}
           >
             {uploading ? (
-              <Loader2 className="h-5 w-5 text-[#111111] animate-spin" />
+              <Loader2 className="h-5 w-5 text-foreground animate-spin" />
             ) : (
               <>
-                <Upload className="h-5 w-5 text-[#111111]" />
-                <span className="text-[10px] font-bold text-[#111111]">Tambah</span>
+                <Upload className="h-5 w-5 text-foreground" />
+                <span className="text-[10px] font-bold text-foreground">Tambah</span>
               </>
             )}
           </button>
         )}
       </div>
-      <p className="text-[11px] text-[#9A9A9A] mt-1.5">
+      <p className="text-[11px] text-muted-foreground mt-1.5">
         Foto pertama jadi foto sampul. Maks {max} foto, JPG/PNG/WebP, 5MB per foto.
       </p>
 

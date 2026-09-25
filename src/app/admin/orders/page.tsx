@@ -11,19 +11,10 @@ import { AdminPaymentProofButton } from "@/components/admin/admin-payment-proof-
 import { formatShortDate } from "@/lib/utils/date";
 import { cn } from "@/lib/utils/cn";
 import { ShoppingBag, Search } from "lucide-react";
+import { ORDER_STATUS } from "@/lib/constants/status";
 import type { OrderStatus } from "@prisma/client";
 
 const PAGE_SIZE = 20;
-
-const orderStatusConfig: Record<OrderStatus, { label: string; variant: any }> = {
-  PENDING_PAYMENT: { label: "Menunggu Bayar", variant: "secondary" },
-  PAYMENT_REVIEW: { label: "Verifikasi", variant: "warning" },
-  PAID: { label: "Lunas", variant: "success" },
-  PRODUCTION: { label: "Produksi", variant: "info" },
-  READY: { label: "Siap Kirim", variant: "default" },
-  COMPLETED: { label: "Selesai", variant: "outline" },
-  CANCELLED: { label: "Batal", variant: "destructive" },
-};
 
 const STATUS_FILTERS: { value: OrderStatus | "ALL"; label: string }[] = [
   { value: "ALL", label: "Semua" },
@@ -37,7 +28,7 @@ const STATUS_FILTERS: { value: OrderStatus | "ALL"; label: string }[] = [
 ];
 
 function isOrderStatus(value?: string): value is OrderStatus {
-  return Boolean(value) && value !== "ALL" && value! in orderStatusConfig;
+  return Boolean(value) && value !== "ALL" && value! in ORDER_STATUS;
 }
 
 async function OrderList({
@@ -70,7 +61,7 @@ async function OrderList({
     <>
       <div className="space-y-3">
         {orders.map((o) => {
-          const cfg = orderStatusConfig[o.status];
+          const cfg = ORDER_STATUS[o.status];
           return (
             <div key={o.id} className="rounded-lg border border-border bg-white p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">

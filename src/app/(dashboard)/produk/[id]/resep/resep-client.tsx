@@ -14,7 +14,7 @@ import { calculateHpp } from "@/lib/utils/hpp";
 import { UNIT_LABELS } from "@/lib/constants/units";
 import { toDisplayUnit } from "@/lib/utils/units";
 import type { getProduct } from "@/actions/products";
-import { ArrowLeft, Trash2, FlaskConical, Wallet } from "lucide-react";
+import { ArrowLeft, Trash2, Boxes, Wallet } from "lucide-react";
 import Link from "next/link";
 
 type ProductForResep = NonNullable<Awaited<ReturnType<typeof getProduct>>>;
@@ -57,8 +57,8 @@ export function ResepClient({
   return (
     <>
       <PageHeader
-        title="Resep Produk"
-        description="Bahan baku, biaya tambahan, dan harga jual — semua di satu halaman"
+        title="Komposisi Bahan"
+        description="Bahan, biaya tambahan, dan harga jual — semua di satu halaman"
         actions={
           <Button variant="ghost" asChild>
             <Link href={`/produk/${productId}`}>
@@ -72,15 +72,15 @@ export function ResepClient({
         <OnboardingHint
           id="resep-first-time"
           show={initialRecipeItems.length === 0}
-          message="Tambahkan bahan baku produk ini dulu. Setelah itu kamu bisa langsung atur biaya tambahan (kemasan, dll) dan simulasikan harga jual — tanpa pindah halaman."
+          message="Tambahkan bahan produk ini dulu. Setelah itu kamu bisa langsung atur biaya tambahan (kemasan, dll) dan simulasikan harga jual — tanpa pindah halaman."
           side="bottom"
         >
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <FlaskConical className="h-4 w-4" />
-                  1. Bahan Baku
+                  <Boxes className="h-4 w-4" />
+                  1. Bahan & Material
                 </CardTitle>
                 <div className="text-right">
                   <p className="text-xs text-muted-foreground">Subtotal Bahan</p>

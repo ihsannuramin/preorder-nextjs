@@ -26,7 +26,7 @@ async function ProfitContent() {
   const metrics = [
     { label: "Total Pendapatan", value: revenue, icon: DollarSign, color: "text-primary-600" },
     { label: "Total HPP", value: totalHpp, icon: Package, color: "text-muted-foreground" },
-    { label: "Estimasi Keuntungan", value: profit, icon: profit >= 0 ? TrendingUp : TrendingDown, color: profit >= 0 ? "text-success" : "text-error" },
+    { label: "Estimasi Keuntungan", value: profit, icon: profit >= 0 ? TrendingUp : TrendingDown, color: profit >= 0 ? "text-success-700" : "text-error" },
   ];
 
   return (
@@ -77,8 +77,8 @@ async function ProfitContent() {
         <CardHeader><CardTitle className="text-base">Cara Membaca</CardTitle></CardHeader>
         <CardContent className="text-sm text-muted-foreground space-y-1">
           <p><strong>Pendapatan</strong> = total pembayaran dari pelanggan yang sudah lunas</p>
-          <p><strong>HPP</strong> = total biaya bahan baku untuk semua produk yang dipesan</p>
-          <p><strong>Keuntungan</strong> = Pendapatan − HPP (belum termasuk biaya operasional lain)</p>
+          <p><strong>HPP</strong> = modal per produk (bahan & biaya tambahan) dikali jumlah yang dipesan</p>
+          <p><strong>Keuntungan</strong> = Pendapatan − modal (HPP) (belum termasuk biaya operasional lain)</p>
         </CardContent>
       </Card>
     </div>
@@ -90,7 +90,7 @@ export default function KeuntunganPage() {
     <>
       <PageHeader
         title="Keuntungan"
-        description="Pantau estimasi keuntungan berdasarkan data HPP"
+        description="Tahu untung dari setiap PO, bukan cuma omzet"
       />
       <Suspense fallback={<PageSkeleton />}>
         <ProfitContent />

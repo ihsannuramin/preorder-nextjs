@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
         "Total": String(o.totalAmount),
         "HPP": String(o.totalHpp),
         "Status": o.status,
-        "Kampanye": o.campaign.name,
+        "Periode PO": o.campaign.name,
         "Tanggal": o.createdAt.toISOString(),
       }));
       csv = toCSV(rows);
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
         const revenue = c.orders.reduce((s, o) => s + Number(o.totalAmount), 0);
         const hpp = c.orders.reduce((s, o) => s + Number(o.totalHpp), 0);
         return {
-          "Kampanye": c.name,
+          "Periode PO": c.name,
           "Status": c.status,
           "Jumlah Pesanan": c.orders.length,
           "Total Pendapatan": revenue,
@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
       );
 
       const rows = needs.map((n) => ({
-        "Bahan Baku": n.ingredientName,
+        "Bahan": n.ingredientName,
         "Satuan": n.unit,
         "Total Kebutuhan": n.totalQuantity,
         "Estimasi Biaya": n.estimatedCost,

@@ -25,11 +25,11 @@ async function OverviewContent() {
 
   const metrics = [
     { label: "Total Tenant", value: counts.totalStores, icon: Store, color: "text-primary-600" },
-    { label: "Tenant Aktif", value: counts.activeStores, icon: Store, color: "text-success" },
+    { label: "Tenant Aktif", value: counts.activeStores, icon: Store, color: "text-success-700" },
     { label: "Tenant Nonaktif", value: counts.suspendedStores, icon: Store, color: "text-error" },
     { label: "Total Pengguna", value: counts.totalUsers, icon: Users, color: "text-info" },
     { label: "Total Pesanan", value: counts.totalOrders, icon: ShoppingBag, color: "text-primary-600" },
-    { label: "Pesanan Hari Ini", value: counts.ordersToday, icon: ShoppingBag, color: "text-warning" },
+    { label: "Pesanan Hari Ini", value: counts.ordersToday, icon: ShoppingBag, color: "text-warning-700" },
   ];
 
   return (
@@ -70,7 +70,7 @@ async function OverviewContent() {
               <CurrencyDisplay
                 amount={finance.profit}
                 size="sm"
-                className={`font-bold ${finance.profit >= 0 ? "text-success" : "text-error"}`}
+                className={`font-bold ${finance.profit >= 0 ? "text-success-700" : "text-error"}`}
               />
             </div>
           </CardContent>

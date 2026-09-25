@@ -60,7 +60,7 @@ export default function BahanBakuBaruPage() {
   function handleSubmit() {
     const incomplete = rows.find((r) => !r.name.trim() || !r.unit);
     if (incomplete) {
-      toast.error("Lengkapi nama dan satuan untuk semua bahan baku");
+      toast.error("Lengkapi nama dan satuan untuk semua bahan");
       return;
     }
 
@@ -79,8 +79,8 @@ export default function BahanBakuBaruPage() {
       if (result.success) {
         toast.success(
           result.data.count > 1
-            ? `${result.data.count} bahan baku berhasil ditambahkan!`
-            : "Bahan baku berhasil ditambahkan!"
+            ? `${result.data.count} bahan berhasil ditambahkan!`
+            : "Bahan berhasil ditambahkan!"
         );
         router.push("/bahan-baku");
       } else {
@@ -92,8 +92,8 @@ export default function BahanBakuBaruPage() {
   return (
     <>
       <PageHeader
-        title="Tambah Bahan Baku"
-        description="Bisa tambah lebih dari satu bahan baku sekaligus"
+        title="Tambah Bahan & Material"
+        description="Bisa tambah lebih dari satu bahan sekaligus"
         actions={
           <Button variant="ghost" asChild>
             <Link href="/bahan-baku"><ArrowLeft className="h-4 w-4 mr-1" />Kembali</Link>
@@ -106,7 +106,7 @@ export default function BahanBakuBaruPage() {
           <Card key={index}>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Bahan Baku #{index + 1}</CardTitle>
+                <CardTitle className="text-base">Bahan #{index + 1}</CardTitle>
                 {rows.length > 1 && (
                   <Button
                     type="button"
@@ -232,7 +232,7 @@ export default function BahanBakuBaruPage() {
 
         <Button type="button" variant="outline" className="w-full" onClick={addRow}>
           <Plus className="h-4 w-4 mr-1" />
-          Tambah Bahan Baku Lain
+          Tambah Bahan Lain
         </Button>
 
         <div className="flex gap-3">
@@ -240,8 +240,8 @@ export default function BahanBakuBaruPage() {
             {isPending
               ? "Menyimpan..."
               : rows.length > 1
-                ? `Simpan ${rows.length} Bahan Baku`
-                : "Simpan Bahan Baku"}
+                ? `Simpan ${rows.length} Bahan`
+                : "Simpan Bahan"}
           </Button>
           <Button variant="outline" asChild>
             <Link href="/bahan-baku">Batal</Link>

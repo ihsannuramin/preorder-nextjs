@@ -31,8 +31,8 @@ export default function DaftarPage() {
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col items-center text-center gap-4">
-            <div className="rounded-full bg-green-100 p-4">
-              <CheckCircle className="h-8 w-8 text-green-600" />
+            <div className="rounded-full bg-success-50 p-4">
+              <CheckCircle className="h-8 w-8 text-success-700" />
             </div>
             <div>
               <h2 className="text-lg font-semibold">Cek email kamu!</h2>
@@ -54,17 +54,17 @@ export default function DaftarPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl">Daftar Gratis</CardTitle>
-        <CardDescription>Buat akun POHub untuk mulai mengelola pesanan</CardDescription>
+        <CardTitle className="text-xl">Buat Toko</CardTitle>
+        <CardDescription>Coba buat PO pertamamu. Pelanggan pesan lewat satu link, kamu tahu untungnya.</CardDescription>
       </CardHeader>
       <CardContent>
         <form action={handleRegister} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="businessName">Nama Bisnis</Label>
+            <Label htmlFor="businessName">Nama Toko</Label>
             <Input
               id="businessName"
               name="businessName"
-              placeholder="Contoh: Kopi Bu Ani"
+              placeholder="Contoh: Dapur Bu Rini"
               required
             />
           </div>

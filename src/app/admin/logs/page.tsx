@@ -51,7 +51,7 @@ export default async function AdminLogsPage({
       <PageHeader title="Log Sistem" description="Log error dan aktivitas server terbaru" />
 
       <div className="mb-4 flex items-start gap-3 rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm text-muted-foreground">
-        <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5 text-warning" />
+        <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5 text-warning-700" />
         <p>
           Log ini dibaca dari file lokal (<code>logs/*.log</code>) di server yang sedang menangani
           request ini. Jika aplikasi berjalan di platform serverless dengan banyak instance (mis.

@@ -45,7 +45,7 @@ export function RecipeCostingSection({
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Total HPP</CardTitle>
+          <CardTitle className="text-base">Modal per Produk (HPP)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           {baseCostRow}
@@ -54,7 +54,7 @@ export function RecipeCostingSection({
             <CurrencyDisplay amount={additionalCostTotal} size="sm" />
           </div>
           <div className="flex justify-between text-sm font-semibold border-t pt-2">
-            <span>Total HPP</span>
+            <span>Modal per produk</span>
             <CurrencyDisplay amount={hpp} size="sm" className="text-primary-700" />
           </div>
         </CardContent>

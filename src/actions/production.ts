@@ -55,12 +55,12 @@ export async function generateProductionSheet(
     if (existingSheet?.startedAt) {
       return {
         success: false,
-        error: "Produksi sudah dimulai untuk kampanye ini. Reset produksi terlebih dahulu jika ingin menghitung ulang.",
+        error: "Produksi sudah dimulai untuk PO ini. Reset produksi terlebih dahulu jika ingin menghitung ulang.",
       };
     }
 
     const campaign = await fetchQualifyingOrders(campaignId, store.id);
-    if (!campaign) return { success: false, error: "Kampanye tidak ditemukan" };
+    if (!campaign) return { success: false, error: "PO tidak ditemukan" };
 
     const allItems = campaign.orders.flatMap((o) =>
       o.items.map((item) => ({
@@ -157,11 +157,11 @@ export async function startProduction(
       return { success: false, error: "Generate lembar produksi terlebih dahulu sebelum memulai produksi" };
     }
     if (sheet.startedAt) {
-      return { success: false, error: "Produksi untuk kampanye ini sudah dimulai" };
+      return { success: false, error: "Produksi untuk PO ini sudah dimulai" };
     }
 
     const campaign = await fetchQualifyingOrders(campaignId, store.id);
-    if (!campaign) return { success: false, error: "Kampanye tidak ditemukan" };
+    if (!campaign) return { success: false, error: "PO tidak ditemukan" };
 
     const productQuantities = new Map<string, number>();
     for (const order of campaign.orders) {

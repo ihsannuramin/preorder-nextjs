@@ -25,8 +25,8 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
     }
 
     return (
-      <div className="flex rounded-input overflow-hidden border border-[#E5E7EB] focus-within:ring-2 focus-within:ring-[#FFD400] focus-within:border-[#111111]">
-        <span className="flex items-center bg-muted px-3 text-sm text-muted-foreground border-r border-[#E5E7EB] whitespace-nowrap">
+      <div className="flex rounded-input overflow-hidden border border-border focus-within:ring-2 focus-within:ring-ring focus-within:border-primary">
+        <span className="flex items-center bg-muted px-3 text-sm text-muted-foreground border-r border-border whitespace-nowrap">
           Rp
         </span>
         <input

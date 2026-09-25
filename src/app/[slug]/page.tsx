@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { formatDate } from "@/lib/utils/date";
+import { PoweredByFooter } from "@/components/public/powered-by-footer";
+import { StoreIdentity } from "@/components/public/store-identity";
 import {
   MessageCircle,
   Instagram,
@@ -61,8 +63,8 @@ export async function generateMetadata({
   const store = await prisma.store.findUnique({ where: { slug } });
   if (!store) return { title: "Toko tidak ditemukan" };
   return {
-    title: `${store.name} | POHub`,
-    description: store.description ?? `Toko ${store.name} di POHub`,
+    title: { absolute: store.name },
+    description: store.description ?? `Pre-order dari ${store.name}`,
     openGraph: {
       title: store.name,
       description: store.description ?? "",
@@ -112,23 +114,18 @@ export default async function PublicStorePage({
 
   return (
     <div className="min-h-screen bg-background">
+      {store.brandColor && (
+        <div className="h-1.5 w-full" style={{ backgroundColor: store.brandColor }} aria-hidden="true" />
+      )}
       <div className="max-w-2xl mx-auto px-4 pb-16 pt-8">
         <div className="flex flex-col items-center text-center mb-8">
-          <div className="relative w-20 h-20 rounded-full bg-primary-100 flex items-center justify-center mb-4 overflow-hidden">
-            {store.logoUrl ? (
-              <Image
-                src={store.logoUrl}
-                alt={store.name}
-                fill
-                className="object-cover"
-                sizes="80px"
-                priority
-              />
-            ) : (
-              <Package className="h-10 w-10 text-primary-600" />
-            )}
-          </div>
-          <h1 className="text-2xl font-bold text-foreground">{store.name}</h1>
+          <StoreIdentity
+            name={store.name}
+            logoUrl={store.logoUrl}
+            brandColor={store.brandColor}
+            priority
+            nameAs="h1"
+          />
           {store.description && (
             <p className="text-muted-foreground mt-2 text-sm max-w-sm">{store.description}</p>
           )}
@@ -178,7 +175,7 @@ export default async function PublicStorePage({
 
         {store.campaigns.length > 0 && (
           <div className="mb-8 space-y-3">
-            <h2 className="text-lg font-semibold">Pre-Order Aktif</h2>
+            <h2 className="text-lg font-semibold">PO yang Lagi Buka</h2>
             {store.campaigns.map((campaign) => (
               <div
                 key={campaign.id}
@@ -188,10 +185,10 @@ export default async function PublicStorePage({
                   <div>
                     <h3 className="font-semibold text-primary-900">{campaign.name}</h3>
                     <p className="text-xs text-primary-700">
-                      Tutup: {formatDate(campaign.closeDate)}
+                      Ditutup {formatDate(campaign.closeDate)}
                     </p>
                   </div>
-                  <Badge variant="success" className="flex-shrink-0">Buka</Badge>
+                  <Badge variant="default" className="flex-shrink-0">Buka</Badge>
                 </div>
                 <div className="flex gap-2">
                   <Button asChild className="flex-1">
@@ -203,7 +200,7 @@ export default async function PublicStorePage({
                   <Button asChild variant="outline" className="flex-1">
                     <Link href={`/${store.slug}/pesan/${campaign.id}/grup`}>
                       <Users className="h-4 w-4 mr-2" />
-                      Group Order
+                      Pesanan Grup
                     </Link>
                   </Button>
                 </div>
@@ -251,14 +248,20 @@ export default async function PublicStorePage({
         {store.products.length === 0 && store.campaigns.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
             <Package className="h-12 w-12 mx-auto mb-3 opacity-40" />
-            <p>Belum ada produk yang tersedia.</p>
+            <p>Belum ada PO yang buka. Chat toko buat tahu PO berikutnya.</p>
           </div>
         )}
 
-        <p className="text-center text-xs text-muted-foreground mt-12">
-          Dibuat dengan ❤️ menggunakan{" "}
-          <a href="/" className="text-primary-600 hover:underline">POHub</a>
-        </p>
+        <div className="mt-10 text-center">
+          <Link
+            href={`/${store.slug}/cek-pesanan`}
+            className="text-sm font-medium text-primary-600 hover:underline"
+          >
+            Sudah pesan? Cek status pesananmu
+          </Link>
+        </div>
+
+        <PoweredByFooter className="mt-8" />
       </div>
     </div>
   );

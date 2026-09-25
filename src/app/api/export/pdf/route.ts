@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
 
     autoTable(doc, {
       startY: 28,
-      head: [["No. Pesanan", "Pelanggan", "Total", "Status", "Kampanye"]],
+      head: [["No. Pesanan", "Pelanggan", "Total", "Status", "Periode PO"]],
       body: orders.map((o) => [
         o.orderNumber,
         o.customerName,

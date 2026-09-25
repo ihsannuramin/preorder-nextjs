@@ -154,7 +154,7 @@ export async function createIngredient(
           initialQuantity,
           initialCost,
           performedBy,
-          "Stok awal saat pembuatan bahan baku"
+          "Stok awal saat bahan ditambahkan"
         );
         return tx.ingredient.findUniqueOrThrow({ where: { id: created.id } });
       }
@@ -187,7 +187,7 @@ export async function createIngredientsBatch(
     const { store, performedBy } = await getStoreAndUser();
 
     if (rows.length === 0) {
-      return { success: false, error: "Tambahkan minimal 1 bahan baku" };
+      return { success: false, error: "Tambahkan minimal 1 bahan" };
     }
 
     const parsedRows: z.infer<typeof ingredientSchema>[] = [];
@@ -229,7 +229,7 @@ export async function createIngredientsBatch(
             initialQuantity,
             initialCost,
             performedBy,
-            "Stok awal saat pembuatan bahan baku"
+            "Stok awal saat bahan ditambahkan"
           );
         }
       }

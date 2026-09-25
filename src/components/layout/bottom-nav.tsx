@@ -9,7 +9,7 @@ import {
   Package,
   Store,
   Menu,
-  FlaskConical,
+  Boxes,
   Calendar,
   TrendingUp,
   FileText,
@@ -31,7 +31,7 @@ const navItems = [
 ];
 
 const moreItems = [
-  { href: "/bahan-baku", label: "Bahan Baku", icon: FlaskConical },
+  { href: "/bahan-baku", label: "Bahan & Material", icon: Boxes },
   { href: "/periode-po", label: "Periode PO", icon: Calendar },
   { href: "/keuntungan", label: "Keuntungan", icon: TrendingUp },
   { href: "/laporan", label: "Laporan", icon: FileText },
@@ -48,7 +48,7 @@ export function BottomNav() {
 
   return (
     <>
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-[#0D0D0D] z-40 safe-area-inset-bottom">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-border z-40 safe-area-inset-bottom">
         <div className="flex items-center justify-around px-2 py-2">
           {navItems.map((item) => {
             const isActive =
@@ -60,8 +60,8 @@ export function BottomNav() {
                 className={cn(
                   "flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-full min-w-[52px] min-h-[44px] justify-center transition-all duration-150",
                   isActive
-                    ? "bg-[#FFD400] text-[#111111] border-2 border-[#0D0D0D] shadow-sticker-sm"
-                    : "text-[#9A9A9A] hover:text-[#111111]"
+                    ? "bg-primary-50 text-primary-700 border border-primary-200"
+                    : "text-muted-foreground hover:text-foreground"
                 )}
               >
                 <item.icon className="h-5 w-5" />
@@ -75,8 +75,8 @@ export function BottomNav() {
             className={cn(
               "flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-full min-w-[52px] min-h-[44px] justify-center transition-all duration-150",
               isMoreActive
-                ? "bg-[#FFD400] text-[#111111] border-2 border-[#0D0D0D] shadow-sticker-sm"
-                : "text-[#9A9A9A] hover:text-[#111111]"
+                ? "bg-primary-50 text-primary-700 border border-primary-200"
+                : "text-muted-foreground hover:text-foreground"
             )}
           >
             <Menu className="h-5 w-5" />
@@ -102,8 +102,8 @@ export function BottomNav() {
                   className={cn(
                     "flex flex-col items-center justify-center gap-2 rounded-lg border-2 p-4 text-sm font-semibold transition-all duration-150 min-h-[88px]",
                     isActive
-                      ? "border-[#0D0D0D] bg-[#FFD400] shadow-sticker-sm"
-                      : "border-[#E5E7EB] text-[#9A9A9A] hover:bg-[#F7F7F7] hover:text-[#111111]"
+                      ? "border-primary bg-primary-50 text-primary-700"
+                      : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
                 >
                   <item.icon className="h-5 w-5" />

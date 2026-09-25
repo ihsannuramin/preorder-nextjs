@@ -112,13 +112,13 @@ export function PembelianClient({ ingredient }: { ingredient: SerializedIngredie
             </div>
 
             {qty > 0 && cost > 0 && (
-              <div className="rounded-lg border-2 border-[#0D0D0D] bg-[#F7F7F7] p-4 space-y-2">
+              <div className="rounded-lg border border-border bg-muted p-4 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#9A9A9A]">Stok baru</span>
+                  <span className="text-muted-foreground">Stok baru</span>
                   <span className="font-semibold">{newStock} {unitLabel}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#9A9A9A]">Biaya rata-rata baru</span>
+                  <span className="text-muted-foreground">Biaya rata-rata baru</span>
                   <CurrencyDisplay amount={newAverageCost} size="sm" className="font-semibold" />
                 </div>
               </div>

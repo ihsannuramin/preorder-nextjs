@@ -12,27 +12,10 @@ import { formatRelative } from "@/lib/utils/date";
 import { formatDate } from "@/lib/utils/date";
 import { ShoppingBag, Users, Search } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { ORDER_STATUS, GROUP_ORDER_STATUS } from "@/lib/constants/status";
 import type { OrderStatus } from "@prisma/client";
 
 const PAGE_SIZE = 10;
-
-const orderStatusConfig: Record<OrderStatus, { label: string; variant: any }> = {
-  PENDING_PAYMENT: { label: "Menunggu Bayar", variant: "secondary" },
-  PAYMENT_REVIEW: { label: "Verifikasi", variant: "warning" },
-  PAID: { label: "Lunas", variant: "success" },
-  PRODUCTION: { label: "Produksi", variant: "info" },
-  READY: { label: "Siap Kirim", variant: "default" },
-  COMPLETED: { label: "Selesai", variant: "outline" },
-  CANCELLED: { label: "Batal", variant: "destructive" },
-};
-
-const groupStatusConfig = {
-  COLLECTING: { label: "Mengumpulkan", variant: "warning" as const },
-  CLOSED: { label: "Ditutup", variant: "secondary" as const },
-  PAYMENT_REVIEW: { label: "Verifikasi Pembayaran", variant: "warning" as const },
-  PAID: { label: "Lunas", variant: "success" as const },
-  CANCELLED: { label: "Dibatalkan", variant: "destructive" as const },
-};
 
 // ── Tab switcher (server-rendered, Link-based) ─────────────────────────────
 function PesananTabs({ active }: { active: string }) {
@@ -92,7 +75,7 @@ async function OrderList({ q, page }: { q?: string; page: number }) {
     <>
       <div className="space-y-3">
         {orders.map((order) => {
-          const cfg = orderStatusConfig[order.status];
+          const cfg = ORDER_STATUS[order.status];
           return (
             <Link
               key={order.id}
@@ -156,7 +139,7 @@ async function GroupOrderList({ q, page }: { q?: string; page: number }) {
     <>
       <div className="space-y-3">
         {groupOrders.map((go) => {
-          const cfg = groupStatusConfig[go.status];
+          const cfg = GROUP_ORDER_STATUS[go.status];
           return (
             <Link
               key={go.id}

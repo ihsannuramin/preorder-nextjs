@@ -53,7 +53,7 @@ async function TenantList({ q, page }: { q?: string; page: number }) {
               </div>
               <div className="text-right flex-shrink-0 text-xs text-muted-foreground space-y-0.5">
                 <p>{tenant.productCount} produk</p>
-                <p>{tenant.campaignCount} kampanye</p>
+                <p>{tenant.campaignCount} PO</p>
                 <p>{tenant.orderCount} pesanan</p>
                 <p>{formatShortDate(tenant.createdAt)}</p>
               </div>

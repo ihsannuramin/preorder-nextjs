@@ -9,18 +9,10 @@ import { ListSkeleton } from "@/components/shared/loading-skeleton";
 import { ListSearch, ListPagination } from "@/components/shared/list-controls";
 import { formatShortDate } from "@/lib/utils/date";
 import { Plus, Calendar, Search } from "lucide-react";
+import { CAMPAIGN_STATUS } from "@/lib/constants/status";
 import type { CampaignStatus } from "@prisma/client";
 
 const PAGE_SIZE = 10;
-
-const statusConfig: Record<CampaignStatus, { label: string; variant: any }> = {
-  DRAFT: { label: "Draft", variant: "secondary" },
-  OPEN: { label: "Buka", variant: "success" },
-  CLOSED: { label: "Tutup", variant: "warning" },
-  PRODUCTION: { label: "Produksi", variant: "info" },
-  COMPLETED: { label: "Selesai", variant: "outline" },
-  CANCELLED: { label: "Batal", variant: "destructive" },
-};
 
 async function CampaignList({ q, page }: { q?: string; page: number }) {
   let campaigns, total;
@@ -56,7 +48,7 @@ async function CampaignList({ q, page }: { q?: string; page: number }) {
     <>
       <div className="space-y-3">
         {campaigns.map((campaign) => {
-          const cfg = statusConfig[campaign.status];
+          const cfg = CAMPAIGN_STATUS[campaign.status];
           return (
             <Link
               key={campaign.id}
@@ -103,7 +95,7 @@ export default async function PeriodePOPage({
     <>
       <PageHeader
         title="Periode PO"
-        description="Kelola kampanye pre-order kamu"
+        description="Buka PO, pantau pesanan, lalu tutup dan rekap"
         actions={
           <Button asChild>
             <Link href="/periode-po/baru">

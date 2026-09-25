@@ -64,9 +64,9 @@ export function PaymentVerification({ orderId, paymentProofUrl }: PaymentVerific
 
   return (
     <>
-      <Card className="border-yellow-200 bg-yellow-50">
+      <Card className="border-warning-200 bg-warning-50">
         <CardHeader>
-          <CardTitle className="text-base text-yellow-800">Verifikasi Pembayaran</CardTitle>
+          <CardTitle className="text-base text-foreground">Verifikasi Pembayaran</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {paymentProofUrl ? (
@@ -75,10 +75,10 @@ export function PaymentVerification({ orderId, paymentProofUrl }: PaymentVerific
               Lihat Bukti Pembayaran
             </Button>
           ) : (
-            <p className="text-sm text-yellow-700">Pelanggan belum mengunggah bukti pembayaran.</p>
+            <p className="text-sm text-warning-700">Pelanggan belum mengunggah bukti pembayaran.</p>
           )}
           <div className="flex gap-2">
-            <Button onClick={handleApprove} disabled={isPending} size="sm" className="bg-success hover:bg-green-600">
+            <Button onClick={handleApprove} disabled={isPending} size="sm" className="bg-success text-secondary hover:bg-success/90">
               <CheckCircle className="h-4 w-4 mr-1" />
               Setujui
             </Button>

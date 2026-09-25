@@ -8,15 +8,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { GroupPaymentProofUpload } from "@/components/shared/group-payment-proof-upload";
 import { closeGroupOrder } from "@/actions/group-orders";
-import { Users, Copy, Lock, ChevronDown, ChevronUp, CheckCircle2, Circle } from "lucide-react";
+import { PaymentInstructions, type PublicPaymentMethod } from "@/components/public/payment-instructions";
+import { PoweredByFooter } from "@/components/public/powered-by-footer";
+import { StoreIdentity } from "@/components/public/store-identity";
+import { cleanPhone } from "@/lib/utils/whatsapp";
+import { Users, Copy, Lock, ChevronDown, ChevronUp, CheckCircle2, Circle, MessageCircle } from "lucide-react";
 
 type GroupStatus = "COLLECTING" | "CLOSED" | "PAYMENT_REVIEW" | "PAID" | "CANCELLED";
 
 const STEPS: { status: GroupStatus; label: string }[] = [
-  { status: "COLLECTING", label: "Mengumpulkan Pesanan" },
-  { status: "CLOSED", label: "Menunggu Pembayaran" },
-  { status: "PAYMENT_REVIEW", label: "Menunggu Verifikasi" },
-  { status: "PAID", label: "Pembayaran Diterima" },
+  { status: "COLLECTING", label: "Teman-teman sedang memilih pesanan" },
+  { status: "CLOSED", label: "Menunggu pembayaran" },
+  { status: "PAYMENT_REVIEW", label: "Bukti bayar sedang dicek toko" },
+  { status: "PAID", label: "Pembayaran diterima" },
 ];
 
 type GroupData = {
@@ -31,6 +35,13 @@ type GroupData = {
   paymentProofUrl: string | null;
   rejectionReason: string | null;
   campaign: { id: string; name: string };
+  store: {
+    name: string;
+    whatsapp: string | null;
+    logoUrl: string | null;
+    brandColor: string | null;
+    paymentMethods: PublicPaymentMethod[];
+  };
 };
 
 type MemberOrder = {
@@ -58,14 +69,14 @@ export function RingkasanClient({
 
   function copyLink() {
     navigator.clipboard.writeText(memberLink);
-    toast.success("Link berhasil disalin!");
+    toast.success("Link sudah disalin");
   }
 
   function handleClose() {
     startTransition(async () => {
       const result = await closeGroupOrder(sessionCode);
       if (result.success) {
-        toast.success("Sesi ditutup. Anggota tidak bisa pesan lagi.");
+        toast.success("Pesanan grup ditutup. Sekarang tinggal bayar tagihannya.");
         router.refresh();
       } else {
         toast.error(result.error);
@@ -76,18 +87,21 @@ export function RingkasanClient({
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-xl mx-auto px-4 py-8 space-y-4">
-        <div className="flex items-center gap-3 mb-2">
-          <Users className="h-6 w-6 text-primary-600" />
-          <div>
-            <h1 className="text-xl font-bold">Ringkasan Group Order</h1>
-            <p className="text-sm text-muted-foreground">{group.campaign.name}</p>
-          </div>
+        <div className="text-center mb-2">
+          <StoreIdentity
+            name={group.store.name}
+            logoUrl={group.store.logoUrl}
+            brandColor={group.store.brandColor}
+            size="sm"
+          />
+          <h1 className="text-xl font-bold mt-3">Ringkasan Pesanan Grup</h1>
+          <p className="text-sm text-muted-foreground">{group.campaign.name}</p>
         </div>
 
         {group.status === "CANCELLED" ? (
-          <Card className="border-red-200 bg-red-50">
-            <CardContent className="pt-4 text-center text-red-700 font-medium">
-              Sesi group order ini telah dibatalkan.
+          <Card className="border-error-200 bg-error-50">
+            <CardContent className="pt-4 text-center text-error-700 font-medium">
+              Pesanan grup ini dibatalkan. Chat {group.store.name} kalau ada pertanyaan.
             </CardContent>
           </Card>
         ) : (
@@ -102,7 +116,7 @@ export function RingkasanClient({
                   return (
                     <div key={step.status} className="flex items-center gap-3">
                       {done ? (
-                        <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
+                        <CheckCircle2 className="h-5 w-5 text-success-700 flex-shrink-0" />
                       ) : (
                         <Circle className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                       )}
@@ -131,7 +145,7 @@ export function RingkasanClient({
 
         <div className="flex justify-between items-center rounded-card border border-border bg-white p-4">
           <div>
-            <p className="font-semibold">Total Tagihan Bos</p>
+            <p className="font-semibold">Total Tagihan Grup</p>
             <p className="text-xs text-muted-foreground">{members.length} anggota · {members.reduce((s, m) => s + m.items.reduce((si, i) => si + i.quantity, 0), 0)} item</p>
           </div>
           <CurrencyDisplay amount={group.totalAmount} size="lg" className="text-primary-700 font-bold" />
@@ -142,8 +156,33 @@ export function RingkasanClient({
             <CardHeader><CardTitle className="text-base">Bayar Tagihan</CardTitle></CardHeader>
             <CardContent className="space-y-3">
               {group.rejectionReason && (
-                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-                  Bukti sebelumnya ditolak: {group.rejectionReason}
+                <div className="rounded-lg border border-error-200 bg-error-50 p-3 text-sm text-error-700">
+                  <p>{group.store.name} belum bisa memverifikasi bukti bayarmu. Alasannya: {group.rejectionReason}</p>
+                  <p className="mt-1">Unggah ulang bukti yang jelas di bawah, ya.</p>
+                </div>
+              )}
+              {group.store.paymentMethods.length > 0 ? (
+                <PaymentInstructions
+                  methods={group.store.paymentMethods}
+                  totalAmount={group.totalAmount}
+                />
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Chat {group.store.name} buat tahu cara bayarnya, lalu unggah buktinya di sini.
+                  </p>
+                  {group.store.whatsapp && (
+                    <Button asChild variant="secondary" className="w-full">
+                      <a
+                        href={`https://wa.me/${cleanPhone(group.store.whatsapp)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <MessageCircle className="h-4 w-4 mr-2 text-green-600" />
+                        Chat {group.store.name} (WA)
+                      </a>
+                    </Button>
+                  )}
                 </div>
               )}
               <GroupPaymentProofUpload sessionCode={sessionCode} onUploaded={() => router.refresh()} />
@@ -153,7 +192,7 @@ export function RingkasanClient({
 
         {group.status === "COLLECTING" && (
           <Card>
-            <CardHeader><CardTitle className="text-base">Bagikan Link ke Anggota</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-base">Bagikan Link ke Teman-teman</CardTitle></CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 p-3">
                 <span className="text-xs text-muted-foreground flex-1 break-all">{memberLink}</span>
@@ -205,7 +244,7 @@ export function RingkasanClient({
         {members.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
             <Users className="h-10 w-10 mx-auto mb-2 opacity-40" />
-            <p className="text-sm">Belum ada yang pesan. Bagikan link di atas ke anggota.</p>
+            <p className="text-sm">Belum ada yang pesan. Bagikan link di atas ke teman-teman.</p>
           </div>
         )}
 
@@ -217,9 +256,11 @@ export function RingkasanClient({
             disabled={isPending}
           >
             <Lock className="h-4 w-4 mr-2" />
-            {isPending ? "Menutup..." : "Tutup Sesi (Tidak Bisa Dibuka Kembali)"}
+            {isPending ? "Menutup..." : "Tutup Pesanan Grup (Tidak Bisa Dibuka Lagi)"}
           </Button>
         )}
+
+        <PoweredByFooter />
       </div>
     </div>
   );

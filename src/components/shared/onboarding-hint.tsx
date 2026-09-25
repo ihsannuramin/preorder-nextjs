@@ -49,23 +49,23 @@ export function OnboardingHint({ id, message, show = true, side = "bottom", chil
       >
         {/* Arrow top (when bubble is below element) */}
         {side === "bottom" && (
-          <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#FFD400] border-l-2 border-t-2 border-[#0D0D0D] rotate-45" />
+          <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-primary-50 border-l border-t border-primary-200 rotate-45" />
         )}
 
-        <div className="rounded-xl border-2 border-[#0D0D0D] bg-[#FFD400] p-3 shadow-[3px_3px_0px_#0D0D0D]">
+        <div className="rounded-xl border border-primary-200 bg-primary-50 p-3 shadow-sm">
           <div className="flex items-start gap-2">
-            <p className="text-xs font-medium text-[#0D0D0D] flex-1 leading-relaxed">{message}</p>
+            <p className="text-xs font-medium text-foreground flex-1 leading-relaxed">{message}</p>
             <button
               onClick={dismiss}
               className="flex-shrink-0 mt-0.5 rounded hover:bg-black/10 p-0.5 transition-colors"
               aria-label="Tutup"
             >
-              <X className="h-3.5 w-3.5 text-[#0D0D0D]" />
+              <X className="h-3.5 w-3.5 text-foreground" />
             </button>
           </div>
           <button
             onClick={dismiss}
-            className="mt-2 text-xs font-bold text-[#0D0D0D] hover:underline"
+            className="mt-2 text-xs font-bold text-foreground hover:underline"
           >
             Mengerti ✓
           </button>
@@ -73,7 +73,7 @@ export function OnboardingHint({ id, message, show = true, side = "bottom", chil
 
         {/* Arrow bottom (when bubble is above element) */}
         {side === "top" && (
-          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#FFD400] border-r-2 border-b-2 border-[#0D0D0D] rotate-45" />
+          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-primary-50 border-r border-b border-primary-200 rotate-45" />
         )}
       </div>
     </div>
