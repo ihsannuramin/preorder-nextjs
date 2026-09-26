@@ -5,11 +5,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "POHub — Manajemen Pre-Order untuk UMKM",
+    default: "POHub by Tojuko.ID — Jualan PO, tanpa ribetnya",
     template: "%s | POHub",
   },
   description:
-    "Platform pre-order paling sederhana untuk UMKM rumahan. Kelola produk, pesanan, dan laporan dalam satu tempat.",
+    "Pelangganmu pesan lebih gampang lewat satu link, kamu tahu bahan yang harus dibeli dan untung dari setiap PO.",
 };
 
 export default function RootLayout({
@@ -25,9 +25,9 @@ export default function RootLayout({
           position="top-center"
           toastOptions={{
             classNames: {
-              toast: "!rounded-full !border-2 !border-[#0D0D0D] !shadow-sticker !font-sans",
-              success: "!bg-[#FFD400] !text-[#111111]",
-              error: "!bg-[#FF3B6B] !text-white",
+              toast: "!rounded-xl !border !border-border !shadow-md !font-sans",
+              success: "!bg-success !text-secondary",
+              error: "!bg-error !text-white",
             },
           }}
         />

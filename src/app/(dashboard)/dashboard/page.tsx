@@ -76,7 +76,7 @@ async function DashboardContent() {
 
   const metrics = [
     { label: "Periode PO Aktif", value: openCampaigns, icon: Calendar, color: "text-primary-600" },
-    { label: "Menunggu Pembayaran", value: pendingPayments, icon: Clock, color: "text-warning" },
+    { label: "Menunggu Pembayaran", value: pendingPayments, icon: Clock, color: "text-warning-700" },
     { label: "Perlu Verifikasi", value: needVerification, icon: AlertCircle, color: "text-error" },
     { label: "Pesanan Hari Ini", value: ordersToday, icon: ShoppingBag, color: "text-info" },
   ];
@@ -124,7 +124,7 @@ async function DashboardContent() {
               <CurrencyDisplay amount={revenue} size="sm" className="font-semibold" />
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Total HPP</span>
+              <span className="text-sm text-muted-foreground">Total Modal (HPP)</span>
               <CurrencyDisplay amount={totalHpp} size="sm" className="text-muted-foreground" />
             </div>
             <div className="flex justify-between border-t pt-3">
@@ -132,7 +132,7 @@ async function DashboardContent() {
               <CurrencyDisplay
                 amount={estimatedProfit}
                 size="sm"
-                className={`font-bold ${estimatedProfit >= 0 ? "text-success" : "text-error"}`}
+                className={`font-bold ${estimatedProfit >= 0 ? "text-success-700" : "text-error"}`}
               />
             </div>
           </CardContent>

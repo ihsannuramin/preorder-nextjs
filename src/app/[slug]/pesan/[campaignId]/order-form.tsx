@@ -68,7 +68,7 @@ export function OrderForm({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (orderItems.length === 0) {
-      toast.error("Pilih minimal 1 produk");
+      toast.error("Pilih minimal 1 produk dulu, ya.");
       return;
     }
 
@@ -144,7 +144,7 @@ export function OrderForm({
               id="customerName"
               value={customerData.customerName}
               onChange={(e) => setCustomerData({ ...customerData, customerName: e.target.value })}
-              placeholder="Nama sesuai KTP"
+              placeholder="Nama kamu"
               required
             />
           </div>
@@ -175,7 +175,7 @@ export function OrderForm({
               id="customerNotes"
               value={customerData.customerNotes}
               onChange={(e) => setCustomerData({ ...customerData, customerNotes: e.target.value })}
-              placeholder="Instruksi khusus..."
+              placeholder="Misalnya: titip ke satpam"
             />
           </div>
         </CardContent>
@@ -190,8 +190,11 @@ export function OrderForm({
 
       <Button type="submit" disabled={isPending || orderItems.length === 0} className="w-full">
         <ShoppingBag className="h-4 w-4 mr-2" />
-        {isPending ? "Memproses..." : "Kirim Pesanan"}
+        {isPending ? "Mengirim pesanan..." : "Kirim Pesanan"}
       </Button>
+      <p className="text-center text-xs text-muted-foreground">
+        Setelah dikirim, kamu dapat nomor pesanan dan cara bayar dari {campaign.store.name}.
+      </p>
     </form>
   );
 }

@@ -122,7 +122,7 @@ export default function MasukPage() {
         <p className="text-center text-sm text-muted-foreground">
           Belum punya akun?{" "}
           <Link href="/daftar" className="text-primary-600 font-medium hover:underline">
-            Daftar gratis
+            Buat toko
           </Link>
         </p>
       </CardContent>

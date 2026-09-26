@@ -27,13 +27,13 @@ const reports = [
   },
   {
     title: "Laporan Keuntungan",
-    description: "Ringkasan pendapatan, HPP, dan keuntungan per kampanye",
+    description: "Ringkasan pendapatan, HPP, dan keuntungan per PO",
     endpoint: "/api/export/csv?type=profit",
     format: "CSV",
   },
   {
     title: "Laporan Produksi",
-    description: "Kebutuhan bahan baku dari semua kampanye",
+    description: "Kebutuhan bahan dari semua PO",
     endpoint: "/api/export/csv?type=production",
     format: "CSV",
   },

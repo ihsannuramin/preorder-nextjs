@@ -40,7 +40,7 @@ export default async function ProduksiPage({
             <Factory className="h-10 w-10 text-muted-foreground mb-3" />
             <h3 className="font-semibold mb-1">Lembar produksi belum dibuat</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Klik tombol "Generate" untuk menghitung kebutuhan bahan baku dari semua pesanan yang sudah lunas.
+              Klik tombol "Generate" untuk menghitung kebutuhan bahan dari semua pesanan yang sudah lunas.
             </p>
             <GenerateSheetButton campaignId={id} />
           </CardContent>
@@ -57,7 +57,7 @@ export default async function ProduksiPage({
               <AlertTitle>{sheet.availability.ready ? "Siap Produksi" : "Bahan Kurang"}</AlertTitle>
               <AlertDescription>
                 {sheet.availability.ready ? (
-                  "Semua bahan baku tersedia untuk memulai produksi."
+                  "Semua bahan tersedia untuk memulai produksi."
                 ) : (
                   <ul className="space-y-1">
                     {sheet.availability.missing.map((m) => (
@@ -84,7 +84,7 @@ export default async function ProduksiPage({
               <CheckCircle2 className="h-4 w-4" />
               <AlertTitle>Produksi Sudah Dimulai</AlertTitle>
               <AlertDescription>
-                Stok bahan baku sudah dikurangi dan riwayat produksi telah dicatat pada{" "}
+                Stok bahan sudah dikurangi dan riwayat produksi telah dicatat pada{" "}
                 {new Date(sheet.startedAt).toLocaleDateString("id-ID")}.
               </AlertDescription>
             </Alert>
@@ -94,13 +94,13 @@ export default async function ProduksiPage({
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <Factory className="h-4 w-4" />
-                Kebutuhan Bahan Baku
+                Kebutuhan Bahan & Material
               </CardTitle>
             </CardHeader>
             <CardContent>
               {sheet.items.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  Tidak ada kebutuhan bahan yang terdeteksi. Pastikan produk memiliki resep.
+                  Tidak ada kebutuhan bahan yang terdeteksi. Pastikan produk sudah punya komposisi bahan.
                 </p>
               ) : (
                 <div className="overflow-x-auto">

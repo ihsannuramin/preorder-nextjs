@@ -15,7 +15,7 @@ export const productSchema = z
   })
   .refine(
     (data) => data.costMode !== ProductCostMode.MANUAL || data.manualCostPrice != null,
-    { message: "Harga modal wajib diisi untuk produk tanpa bahan baku", path: ["manualCostPrice"] }
+    { message: "Harga modal wajib diisi untuk produk tanpa bahan", path: ["manualCostPrice"] }
   );
 
 export const productUpdateSchema = productSchema.innerType().partial();

@@ -30,6 +30,8 @@ import { ExternalLink, Copy, PartyPopper, Plus, Trash2 } from "lucide-react";
 
 type StoreSetupData = Awaited<ReturnType<typeof getStoreSetupData>>;
 
+const BRAND_COLOR_PRESETS = ["#B45309", "#BE123C", "#7C3AED", "#0F766E", "#15803D", "#1F2937"];
+
 function initialSocialLinks(store: StoreSetupData["store"]): StoreSocialLink[] {
   const stored = store?.socialLinks;
   if (Array.isArray(stored) && stored.length > 0) {
@@ -72,6 +74,7 @@ export function TokoClient({
   const [googleMapsUrl, setGoogleMapsUrl] = useState(
     initialStore?.googleMapsUrl ?? "",
   );
+  const [brandColor, setBrandColor] = useState(initialStore?.brandColor ?? "");
 
   function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
     const val = e.target.value;
@@ -104,6 +107,7 @@ export function TokoClient({
       JSON.stringify(socialLinks.filter((link) => link.value.trim())),
     );
     formData.set("googleMapsUrl", hasOfflineStore ? googleMapsUrl : "");
+    formData.set("brandColor", brandColor);
     if (hasOfflineStore && showGoogleMaps) {
       formData.set("showGoogleMaps", "on");
     }
@@ -131,13 +135,13 @@ export function TokoClient({
       />
 
       {isWelcome && !store && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border-2 border-[#0D0D0D] bg-[#FFD400] p-4 shadow-[3px_3px_0px_#0D0D0D]">
-          <PartyPopper className="h-5 w-5 text-[#0D0D0D] flex-shrink-0 mt-0.5" />
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-warning-200 bg-warning-50 p-4">
+          <PartyPopper className="h-5 w-5 text-foreground flex-shrink-0 mt-0.5" />
           <div>
-            <p className="font-bold text-[#0D0D0D]">
+            <p className="font-bold text-foreground">
               Akun kamu sudah aktif! 🎉
             </p>
-            <p className="text-sm text-[#0D0D0D]/80 mt-0.5">
+            <p className="text-sm text-foreground/80 mt-0.5">
               Yuk lengkapi profil toko kamu dulu — nama toko sudah diisi
               otomatis dari saat kamu daftar.
             </p>
@@ -199,6 +203,41 @@ export function TokoClient({
             </div>
 
             <div className="space-y-1.5">
+              <Label>Warna Toko</Label>
+              <div className="flex flex-wrap items-center gap-2">
+                {BRAND_COLOR_PRESETS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setBrandColor(c)}
+                    className={`h-8 w-8 rounded-full border-2 transition-transform ${
+                      brandColor.toLowerCase() === c.toLowerCase()
+                        ? "border-foreground scale-110"
+                        : "border-white shadow-sm"
+                    }`}
+                    style={{ backgroundColor: c }}
+                    aria-label={`Pilih warna ${c}`}
+                  />
+                ))}
+                <input
+                  type="color"
+                  value={brandColor || "#2563EB"}
+                  onChange={(e) => setBrandColor(e.target.value.toUpperCase())}
+                  className="h-8 w-10 cursor-pointer rounded border border-border bg-white"
+                  aria-label="Pilih warna lain"
+                />
+                {brandColor && (
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setBrandColor("")}>
+                    Hapus
+                  </Button>
+                )}
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Opsional. Dipakai sebagai aksen di bagian atas halaman tokomu.
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
               <Label htmlFor="name">Nama Toko</Label>
               <OnboardingHint
                 id="toko-setup-name"
@@ -211,7 +250,7 @@ export function TokoClient({
                   name="name"
                   value={name}
                   onChange={handleNameChange}
-                  placeholder="Contoh: Kopi Bu Ani"
+                  placeholder="Contoh: Dapur Bu Rini"
                   required
                 />
               </OnboardingHint>
@@ -335,14 +374,14 @@ export function TokoClient({
               </Button>
             </div>
 
-            <div className="space-y-2 rounded-lg border-2 border-[#0D0D0D] p-4">
+            <div className="space-y-2 rounded-lg border border-border p-4">
               <button
                 type="button"
                 onClick={() => setHasOfflineStore((v) => !v)}
                 className={`w-full text-left rounded-lg border-2 p-3 text-sm transition-all ${
                   hasOfflineStore
-                    ? "border-[#0D0D0D] bg-[#FFD400] shadow-sticker-sm font-semibold"
-                    : "border-[#E5E7EB] text-[#9A9A9A]"
+                    ? "border-primary bg-primary-50 text-primary-700 font-semibold"
+                    : "border-border text-muted-foreground"
                 }`}
               >
                 Saya punya toko offline
@@ -367,8 +406,8 @@ export function TokoClient({
                     onClick={() => setShowGoogleMaps((v) => !v)}
                     className={`w-full text-left rounded-lg border-2 p-3 text-sm transition-all ${
                       showGoogleMaps
-                        ? "border-[#0D0D0D] bg-[#FFD400] shadow-sticker-sm font-semibold"
-                        : "border-[#E5E7EB] text-[#9A9A9A]"
+                        ? "border-primary bg-primary-50 text-primary-700 font-semibold"
+                        : "border-border text-muted-foreground"
                     }`}
                   >
                     {showGoogleMaps ? "Tampilkan" : "Sembunyikan"} di halaman toko publik

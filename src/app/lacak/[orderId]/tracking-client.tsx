@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { PaymentProofUpload } from "@/components/shared/payment-proof-upload";
+import { PoweredByFooter } from "@/components/public/powered-by-footer";
+import { PaymentInstructions } from "@/components/public/payment-instructions";
+import { StoreIdentity } from "@/components/public/store-identity";
 import { buildChatSellerMessage, buildPaymentProofFollowupMessage, buildWaLink } from "@/lib/utils/whatsapp";
 import { MessageCircle, CheckCircle2, Circle } from "lucide-react";
 import type { OrderStatus } from "@prisma/client";
@@ -13,11 +16,11 @@ import type { getPublicOrder } from "@/actions/orders";
 type OrderData = NonNullable<Awaited<ReturnType<typeof getPublicOrder>>>;
 
 const STEPS: { status: OrderStatus; label: string }[] = [
-  { status: "PENDING_PAYMENT", label: "Menunggu Pembayaran" },
-  { status: "PAYMENT_REVIEW", label: "Menunggu Verifikasi" },
-  { status: "PAID", label: "Pembayaran Diterima" },
-  { status: "PRODUCTION", label: "Sedang Diproses" },
-  { status: "READY", label: "Siap Diambil/Dikirim" },
+  { status: "PENDING_PAYMENT", label: "Pesanan tercatat, menunggu pembayaranmu" },
+  { status: "PAYMENT_REVIEW", label: "Bukti bayarmu sedang dicek toko" },
+  { status: "PAID", label: "Pembayaran dikonfirmasi" },
+  { status: "PRODUCTION", label: "Pesananmu sedang dibuat" },
+  { status: "READY", label: "Siap diambil/dikirim" },
   { status: "COMPLETED", label: "Selesai" },
 ];
 
@@ -44,20 +47,26 @@ export function TrackingClient({ order }: { order: OrderData }) {
     <div className="min-h-screen bg-background pb-24">
       <div className="max-w-xl mx-auto px-4 py-8 space-y-4">
         <div className="text-center mb-2">
-          <p className="text-sm text-muted-foreground">{order.store.name}</p>
+          <StoreIdentity
+            name={order.store.name}
+            logoUrl={order.store.logoUrl}
+            brandColor={order.store.brandColor}
+            size="sm"
+          />
+          <p className="text-xs text-muted-foreground mt-3">Nomor pesanan</p>
           <h1 className="text-xl font-bold">{order.orderNumber}</h1>
         </div>
 
         {order.status === "CANCELLED" ? (
-          <Card className="border-red-200 bg-red-50">
-            <CardContent className="pt-4 text-center text-red-700 font-medium">
-              Pesanan ini telah dibatalkan.
+          <Card className="border-error-200 bg-error-50">
+            <CardContent className="pt-4 text-center text-error-700 font-medium">
+              Pesanan ini dibatalkan. Chat {order.store.name} kalau ada pertanyaan.
             </CardContent>
           </Card>
         ) : (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Status Pesanan</CardTitle>
+              <CardTitle className="text-base">Status Pesananmu</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -66,7 +75,7 @@ export function TrackingClient({ order }: { order: OrderData }) {
                   return (
                     <div key={step.status} className="flex items-center gap-3">
                       {done ? (
-                        <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
+                        <CheckCircle2 className="h-5 w-5 text-success-700 flex-shrink-0" />
                       ) : (
                         <Circle className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                       )}
@@ -82,10 +91,14 @@ export function TrackingClient({ order }: { order: OrderData }) {
         )}
 
         {order.rejectionReason && (
-          <Card className="border-red-200 bg-red-50">
+          <Card className="border-error-200 bg-error-50">
             <CardContent className="pt-4">
-              <p className="text-sm font-semibold text-red-700">Pembayaran Belum Terverifikasi</p>
-              <p className="text-sm text-red-600 mt-1">{order.rejectionReason}</p>
+              <p className="text-sm font-semibold text-error-700">
+                Bukti bayarmu belum bisa dikonfirmasi: {order.rejectionReason}
+              </p>
+              {canUploadProof && (
+                <p className="text-sm text-foreground mt-1">Unggah ulang di bawah, ya.</p>
+              )}
             </CardContent>
           </Card>
         )}
@@ -113,15 +126,27 @@ export function TrackingClient({ order }: { order: OrderData }) {
         {(canUploadProof || isAwaitingVerification) && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Konfirmasi Pembayaran</CardTitle>
+              <CardTitle className="text-base">Bukti Bayar</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {isAwaitingVerification ? (
                 <p className="text-sm text-muted-foreground text-center">
-                  Bukti pembayaran sedang diperiksa oleh penjual.
+                  Bukti bayarmu sudah diterima. {order.store.name} akan mengeceknya.
                 </p>
               ) : (
-                <PaymentProofUpload orderId={order.id} onUploaded={() => router.refresh()} />
+                <>
+                  {order.store.paymentMethods.length > 0 ? (
+                    <PaymentInstructions
+                      methods={order.store.paymentMethods}
+                      totalAmount={order.totalAmount}
+                    />
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Belum tahu cara bayarnya? Chat {order.store.name} dulu, lalu unggah buktinya di sini.
+                    </p>
+                  )}
+                  <PaymentProofUpload orderId={order.id} onUploaded={() => router.refresh()} />
+                </>
               )}
             </CardContent>
           </Card>
@@ -133,18 +158,20 @@ export function TrackingClient({ order }: { order: OrderData }) {
           <Button asChild className="w-full bg-green-500 hover:bg-green-600 text-white border-0">
             <a href={chatSellerLink} target="_blank" rel="noopener noreferrer">
               <MessageCircle className="h-4 w-4 mr-2" />
-              Chat Seller (WA)
+              Chat Toko (WA)
             </a>
           </Button>
         </div>
       )}
+
+      <PoweredByFooter />
 
       {chatSellerLink && (
         <div className="hidden md:block max-w-xl mx-auto px-4">
           <Button asChild className="w-full bg-green-500 hover:bg-green-600 text-white border-0">
             <a href={chatSellerLink} target="_blank" rel="noopener noreferrer">
               <MessageCircle className="h-4 w-4 mr-2" />
-              Chat Seller (WA)
+              Chat Toko (WA)
             </a>
           </Button>
         </div>

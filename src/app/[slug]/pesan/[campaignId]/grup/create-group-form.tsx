@@ -1,0 +1,106 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { createGroupOrder } from "@/actions/group-orders";
+import { Users } from "lucide-react";
+
+export function CreateGroupForm({
+  slug,
+  campaignId,
+  storeName,
+}: {
+  slug: string;
+  campaignId: string;
+  storeName: string;
+}) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [form, setForm] = useState({
+    facilitatorName: "",
+    facilitatorPhone: "",
+    facilitatorAddress: "",
+    facilitatorNotes: "",
+  });
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    startTransition(async () => {
+      const result = await createGroupOrder({ campaignId, ...form });
+      if (result.success) {
+        router.push(`/${slug}/pesan/${campaignId}/grup/${result.data.sessionCode}/ringkasan`);
+      } else {
+        toast.error(result.error);
+      }
+    });
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Info Penanggung Tagihan</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="facilitatorName">Nama Lengkap</Label>
+            <Input
+              id="facilitatorName"
+              value={form.facilitatorName}
+              onChange={(e) => setForm({ ...form, facilitatorName: e.target.value })}
+              placeholder="Nama penanggung tagihan"
+              required
+              minLength={2}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="facilitatorPhone">Nomor HP / WhatsApp</Label>
+            <Input
+              id="facilitatorPhone"
+              value={form.facilitatorPhone}
+              onChange={(e) => setForm({ ...form, facilitatorPhone: e.target.value })}
+              placeholder="08123456789"
+              required
+              minLength={8}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="facilitatorAddress">Alamat / Titik Ambil</Label>
+            <Textarea
+              id="facilitatorAddress"
+              value={form.facilitatorAddress}
+              onChange={(e) => setForm({ ...form, facilitatorAddress: e.target.value })}
+              placeholder="Alamat pengiriman atau titik ambil untuk seluruh grup"
+              rows={2}
+              required
+              minLength={5}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="facilitatorNotes">Catatan (opsional)</Label>
+            <Input
+              id="facilitatorNotes"
+              value={form.facilitatorNotes}
+              onChange={(e) => setForm({ ...form, facilitatorNotes: e.target.value })}
+              placeholder="Misalnya: diambil hari Sabtu di kantor"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Tagihan seluruh grup dikirim {storeName} ke kamu.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Button type="submit" disabled={isPending} className="w-full">
+        <Users className="h-4 w-4 mr-2" />
+        {isPending ? "Membuat sesi..." : "Buat Pesanan Grup"}
+      </Button>
+    </form>
+  );
+}

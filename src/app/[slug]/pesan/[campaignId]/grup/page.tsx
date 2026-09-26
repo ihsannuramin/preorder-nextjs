@@ -1,117 +1,70 @@
-"use client";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { prisma } from "@/lib/prisma";
+import { publicStoreSelect } from "@/lib/public-store";
+import { PoweredByFooter } from "@/components/public/powered-by-footer";
+import { PublicNotice } from "@/components/public/public-notice";
+import { StoreIdentity } from "@/components/public/store-identity";
+import { CreateGroupForm } from "./create-group-form";
 
-import { useState, useTransition } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { createGroupOrder } from "@/actions/group-orders";
-import { Users, ArrowLeft } from "lucide-react";
-import Link from "next/link";
+type Props = { params: Promise<{ slug: string; campaignId: string }> };
 
-export default function CreateGroupOrderPage() {
-  const params = useParams();
-  const router = useRouter();
-  const slug = params.slug as string;
-  const campaignId = params.campaignId as string;
-  const [isPending, startTransition] = useTransition();
-  const [form, setForm] = useState({
-    facilitatorName: "",
-    facilitatorPhone: "",
-    facilitatorAddress: "",
-    facilitatorNotes: "",
+async function getCampaign(slug: string, campaignId: string) {
+  const campaign = await prisma.campaign.findUnique({
+    where: { id: campaignId },
+    select: {
+      name: true,
+      status: true,
+      closeDate: true,
+      store: { select: publicStoreSelect },
+    },
   });
+  if (!campaign || campaign.store.slug !== slug) return null;
+  return campaign;
+}
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    startTransition(async () => {
-      const result = await createGroupOrder({ campaignId, ...form });
-      if (result.success) {
-        router.push(`/${slug}/pesan/${campaignId}/grup/${result.data.sessionCode}/ringkasan`);
-      } else {
-        toast.error(result.error);
-      }
-    });
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug, campaignId } = await params;
+  const campaign = await getCampaign(slug, campaignId);
+  if (!campaign) return {};
+  return { title: `Pesanan Grup — ${campaign.store.name}` };
+}
+
+export default async function CreateGroupOrderPage({ params }: Props) {
+  const { slug, campaignId } = await params;
+  const campaign = await getCampaign(slug, campaignId);
+  if (!campaign) notFound();
+
+  if (campaign.status !== "OPEN" || new Date() > campaign.closeDate) {
+    return (
+      <PublicNotice
+        store={campaign.store}
+        title="PO ini sudah tutup"
+        message="Chat toko buat tahu PO berikutnya."
+      />
+    );
   }
 
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-xl mx-auto px-4 py-8">
-        <div className="mb-6 flex items-center gap-3">
-          <Link href={`/${slug}`} className="text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Users className="h-5 w-5 text-primary-600" />
-              <h1 className="text-xl font-bold">Buat Group Order</h1>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Kamu akan mendapat link untuk dibagikan ke anggota. Tagihan akan dikirim ke kamu.
-            </p>
-          </div>
+        <div className="mb-6 text-center">
+          <StoreIdentity
+            name={campaign.store.name}
+            logoUrl={campaign.store.logoUrl}
+            brandColor={campaign.store.brandColor}
+            size="sm"
+          />
+          <h1 className="text-xl font-bold mt-3">Buat Pesanan Grup</h1>
+          <p className="text-sm text-muted-foreground mt-1">{campaign.name}</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Kamu dapat satu link buat dibagikan ke teman-teman. Mereka pilih pesanan sendiri,
+            kamu yang bayar sekaligus.
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Info Penanggung Tagihan (Bos)</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="facilitatorName">Nama Lengkap</Label>
-                <Input
-                  id="facilitatorName"
-                  value={form.facilitatorName}
-                  onChange={(e) => setForm({ ...form, facilitatorName: e.target.value })}
-                  placeholder="Nama penanggung tagihan"
-                  required
-                  minLength={2}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="facilitatorPhone">Nomor HP / WhatsApp</Label>
-                <Input
-                  id="facilitatorPhone"
-                  value={form.facilitatorPhone}
-                  onChange={(e) => setForm({ ...form, facilitatorPhone: e.target.value })}
-                  placeholder="08123456789"
-                  required
-                  minLength={8}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="facilitatorAddress">Alamat / Titik Ambil</Label>
-                <Textarea
-                  id="facilitatorAddress"
-                  value={form.facilitatorAddress}
-                  onChange={(e) => setForm({ ...form, facilitatorAddress: e.target.value })}
-                  placeholder="Alamat pengiriman atau titik ambil untuk seluruh grup"
-                  rows={2}
-                  required
-                  minLength={5}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="facilitatorNotes">Catatan (opsional)</Label>
-                <Input
-                  id="facilitatorNotes"
-                  value={form.facilitatorNotes}
-                  onChange={(e) => setForm({ ...form, facilitatorNotes: e.target.value })}
-                  placeholder="Info tambahan untuk anggota..."
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Button type="submit" disabled={isPending} className="w-full">
-            <Users className="h-4 w-4 mr-2" />
-            {isPending ? "Membuat sesi..." : "Buat Sesi Group Order"}
-          </Button>
-        </form>
+        <CreateGroupForm slug={slug} campaignId={campaignId} storeName={campaign.store.name} />
+        <PoweredByFooter className="mt-8" />
       </div>
     </div>
   );

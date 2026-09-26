@@ -10,7 +10,7 @@ import { ListSearch, ListPagination } from "@/components/shared/list-controls";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { UNIT_LABELS } from "@/lib/constants/units";
 import { INGREDIENT_CATEGORY_LABELS } from "@/lib/constants/ingredient-categories";
-import { Plus, FlaskConical, Search } from "lucide-react";
+import { Plus, Boxes, Search } from "lucide-react";
 
 const PAGE_SIZE = 10;
 
@@ -33,13 +33,13 @@ async function IngredientList({ q, page }: { q?: string; page: number }) {
       </div>
     ) : (
       <EmptyState
-        icon={FlaskConical}
-        title="Belum ada bahan baku"
-        description="Tambahkan bahan baku untuk menghitung biaya produksi (HPP) secara otomatis."
-        ctaLabel="Tambah Bahan Baku"
+        icon={Boxes}
+        title="Belum ada bahan"
+        description="Catat bahan & material yang kamu pakai. Modal per produk (HPP) dan kebutuhan belanja jadi terhitung."
+        ctaLabel="Tambah Bahan & Material"
         ctaHref="/bahan-baku/baru"
         hintId="bahan-baku-empty"
-        hint="Input bahan baku untuk menghitung HPP (biaya produksi) secara otomatis di setiap produkmu."
+        hint="Isi bahan & material supaya modal per produk (HPP) terhitung otomatis."
       />
     );
   }
@@ -61,7 +61,7 @@ async function IngredientList({ q, page }: { q?: string; page: number }) {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
                   <div className="w-9 h-9 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
-                    <FlaskConical className="h-4 w-4 text-primary-600" />
+                    <Boxes className="h-4 w-4 text-primary-600" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
@@ -106,8 +106,8 @@ export default async function BahanBakuPage({
   return (
     <>
       <PageHeader
-        title="Bahan Baku"
-        description="Kelola stok dan biaya bahan baku secara otomatis untuk hitung HPP"
+        title="Bahan & Material"
+        description="Tahu bahan mana yang mulai habis, dan berapa modalnya"
         actions={
           <Button asChild>
             <Link href="/bahan-baku/baru">
@@ -118,7 +118,7 @@ export default async function BahanBakuPage({
         }
       />
       <div className="mb-3">
-        <ListSearch defaultValue={q ?? ""} placeholder="Cari nama bahan baku..." />
+        <ListSearch defaultValue={q ?? ""} placeholder="Cari bahan atau material..." />
       </div>
       <Suspense key={`${q}-${page}`} fallback={<ListSkeleton />}>
         <IngredientList q={q} page={page} />

@@ -45,7 +45,7 @@ export function IngredientDetailClient({ ingredient: initial }: { ingredient: Se
     startTransition(async () => {
       const result = await updateIngredient(id, formData);
       if (result.success) {
-        toast.success("Bahan baku berhasil diperbarui!");
+        toast.success("Bahan berhasil diperbarui!");
         router.push("/bahan-baku");
       } else {
         toast.error(result.error);
@@ -57,7 +57,7 @@ export function IngredientDetailClient({ ingredient: initial }: { ingredient: Se
     startTransition(async () => {
       const result = await deleteIngredient(id);
       if (result.success) {
-        toast.success("Bahan baku dihapus");
+        toast.success("Bahan dihapus");
         router.push("/bahan-baku");
       } else {
         toast.error(result.error);
@@ -94,17 +94,17 @@ export function IngredientDetailClient({ ingredient: initial }: { ingredient: Se
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="rounded-lg border-2 border-[#0D0D0D] bg-[#F7F7F7] p-3">
-                <p className="text-xs text-[#9A9A9A] mb-1">Stok Saat Ini</p>
+              <div className="rounded-lg border border-border bg-muted p-3">
+                <p className="text-xs text-muted-foreground mb-1">Stok Saat Ini</p>
                 <p className="font-bold text-sm">{ingredient.currentStock} {unitLabel}</p>
               </div>
-              <div className="rounded-lg border-2 border-[#0D0D0D] bg-[#F7F7F7] p-3">
-                <p className="text-xs text-[#9A9A9A] mb-1">Biaya Rata-rata</p>
+              <div className="rounded-lg border border-border bg-muted p-3">
+                <p className="text-xs text-muted-foreground mb-1">Biaya Rata-rata</p>
                 <CurrencyDisplay amount={ingredient.averageCost} size="sm" className="font-bold" />
               </div>
-              <div className="rounded-lg border-2 border-[#FFD400] bg-[#FFD400] p-3">
-                <p className="text-xs text-[#111111] mb-1">Nilai Stok</p>
-                <CurrencyDisplay amount={ingredient.inventoryValue} size="sm" className="font-bold text-[#111111]" />
+              <div className="rounded-lg border border-primary-200 bg-primary-50 p-3">
+                <p className="text-xs text-foreground mb-1">Nilai Stok</p>
+                <CurrencyDisplay amount={ingredient.inventoryValue} size="sm" className="font-bold text-foreground" />
               </div>
             </div>
             <div className="flex gap-2">
@@ -124,7 +124,7 @@ export function IngredientDetailClient({ ingredient: initial }: { ingredient: Se
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Edit Informasi Bahan Baku</CardTitle>
+            <CardTitle className="text-base">Edit Info Bahan</CardTitle>
           </CardHeader>
           <CardContent>
             <form action={handleSubmit} className="space-y-5">
@@ -202,7 +202,7 @@ export function IngredientDetailClient({ ingredient: initial }: { ingredient: Se
                         {new Date(m.createdAt).toLocaleDateString("id-ID")} · {m.performedBy}
                       </p>
                     </div>
-                    <p className={`text-sm font-semibold ${m.quantityChange >= 0 ? "text-success" : "text-error"}`}>
+                    <p className={`text-sm font-semibold ${m.quantityChange >= 0 ? "text-success-700" : "text-error"}`}>
                       {m.quantityChange >= 0 ? "+" : ""}{m.quantityChange} {unitLabel}
                     </p>
                   </div>
@@ -216,8 +216,8 @@ export function IngredientDetailClient({ ingredient: initial }: { ingredient: Se
       <ConfirmDialog
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title="Hapus Bahan Baku"
-        description="Tindakan ini tidak bisa dibatalkan. Bahan baku, resep yang menggunakannya, dan riwayat pergerakan stok akan ikut terhapus."
+        title="Hapus Bahan"
+        description="Tindakan ini tidak bisa dibatalkan. Bahan ini, komposisi produk yang memakainya, dan riwayat pergerakan stok akan ikut terhapus."
         confirmLabel="Hapus"
         variant="destructive"
         onConfirm={handleDelete}

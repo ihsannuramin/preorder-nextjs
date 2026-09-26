@@ -42,7 +42,7 @@ export function ProductImageUpload({
     <div className="space-y-1.5">
       <MultiImageUpload value={images} onChange={handleChange} disabled={isPending} />
       {isPending && (
-        <p className="text-[11px] text-center text-[#9A9A9A] font-medium">Menyimpan...</p>
+        <p className="text-[11px] text-center text-muted-foreground font-medium">Menyimpan...</p>
       )}
     </div>
   );

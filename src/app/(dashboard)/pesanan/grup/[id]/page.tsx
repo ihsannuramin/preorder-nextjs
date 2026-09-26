@@ -9,15 +9,8 @@ import { GroupOrderStatusActions } from "./group-order-status-actions";
 import { GroupPaymentVerification } from "./group-payment-verification";
 import { Users, Phone, MapPin, FileText, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { GROUP_ORDER_STATUS } from "@/lib/constants/status";
 import { formatDate } from "@/lib/utils/date";
-
-const STATUS_CONFIG = {
-  COLLECTING: { label: "Mengumpulkan", variant: "warning" as const },
-  CLOSED: { label: "Ditutup", variant: "secondary" as const },
-  PAYMENT_REVIEW: { label: "Verifikasi Pembayaran", variant: "warning" as const },
-  PAID: { label: "Lunas", variant: "success" as const },
-  CANCELLED: { label: "Dibatalkan", variant: "destructive" as const },
-};
 
 export default async function GroupOrderDetailPage({
   params,
@@ -29,7 +22,7 @@ export default async function GroupOrderDetailPage({
 
   if (!groupOrder) notFound();
 
-  const cfg = STATUS_CONFIG[groupOrder.status];
+  const cfg = GROUP_ORDER_STATUS[groupOrder.status];
 
   // Consolidated item list
   const consolidatedMap = new Map<
@@ -165,7 +158,7 @@ export default async function GroupOrderDetailPage({
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center gap-2">
-                <Badge variant={cfg.variant}>{cfg.label}</Badge>
+                <Badge variant={cfg.variant}>{cfg.longLabel}</Badge>
                 <span className="text-xs text-muted-foreground font-mono">
                   {groupOrder.sessionCode}
                 </span>

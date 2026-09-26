@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { getPublicOrder } from "@/actions/orders";
+import { PoweredByFooter } from "@/components/public/powered-by-footer";
+import { PaymentInstructions } from "@/components/public/payment-instructions";
 import { buildChatSellerMessage, buildWaLink } from "@/lib/utils/whatsapp";
 import { CheckCircle, Home, MessageCircle, MapPin } from "lucide-react";
 
@@ -19,6 +21,8 @@ export default async function SuksesPage({
   const order = id ? await getPublicOrder(id) : null;
   if (id && !order) notFound();
 
+  const hasPaymentMethods = (order?.store.paymentMethods.length ?? 0) > 0;
+
   const chatSellerLink =
     order?.store.whatsapp &&
     buildWaLink(
@@ -34,12 +38,16 @@ export default async function SuksesPage({
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
       <div className="max-w-sm w-full text-center">
         <div className="mb-6">
-          <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="h-10 w-10 text-success" />
+          <div className="w-20 h-20 rounded-full bg-success-50 flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="h-10 w-10 text-success-700" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Pesanan Berhasil!</h1>
+          <h1 className="text-2xl font-bold text-foreground">Pesananmu sudah tercatat</h1>
           <p className="text-muted-foreground mt-2">
-            Pesananmu sudah kami terima. Segera lakukan pembayaran sesuai petunjuk dari toko.
+            {!order
+              ? "Langkah berikutnya: bayar, lalu unggah buktinya di halaman cek status."
+              : hasPaymentMethods
+                ? `Pesananmu sudah diterima ${order.store.name}. Langkah berikutnya: bayar, lalu unggah buktinya.`
+                : `Pesananmu sudah diterima ${order.store.name}. Chat toko buat tahu cara bayarnya, lalu unggah buktinya di halaman cek status.`}
           </p>
         </div>
 
@@ -54,27 +62,38 @@ export default async function SuksesPage({
               <CurrencyDisplay amount={order.totalAmount} size="lg" className="text-primary-700 font-bold" />
             </div>
             <p className="text-xs text-muted-foreground">
-              Catat atau screenshot halaman ini untuk melacak pesananmu nanti.
+              Pesananmu sudah tercatat dengan nomor {order.orderNumber}. Simpan link cek status
+              buat lihat pesananmu kapan aja.
             </p>
           </div>
         )}
 
+        {order && hasPaymentMethods && (
+          <div className="rounded-card border border-border bg-white p-4 mb-6">
+            <p className="text-left font-semibold mb-3">Cara bayar</p>
+            <PaymentInstructions
+              methods={order.store.paymentMethods}
+              totalAmount={order.totalAmount}
+            />
+          </div>
+        )}
+
         <div className="space-y-3">
-          {chatSellerLink && (
-            <Button asChild className="w-full bg-green-500 hover:bg-green-600 text-white border-0">
-              <a href={chatSellerLink} target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Chat Seller (WA)
-              </a>
+          {order && (
+            <Button asChild className="w-full">
+              <Link href={`/lacak/${order.id}`}>
+                <MapPin className="h-4 w-4 mr-2" />
+                {hasPaymentMethods ? "Sudah Bayar? Unggah Bukti" : "Cek Status & Unggah Bukti Bayar"}
+              </Link>
             </Button>
           )}
 
-          {order && (
+          {chatSellerLink && (
             <Button asChild variant="secondary" className="w-full">
-              <Link href={`/lacak/${order.id}`}>
-                <MapPin className="h-4 w-4 mr-2" />
-                Lacak Pesanan &amp; Upload Bukti Bayar
-              </Link>
+              <a href={chatSellerLink} target="_blank" rel="noopener noreferrer">
+                <MessageCircle className="h-4 w-4 mr-2 text-green-600" />
+                Chat Toko (WA)
+              </a>
             </Button>
           )}
 
@@ -85,6 +104,8 @@ export default async function SuksesPage({
             </Link>
           </Button>
         </div>
+
+        <PoweredByFooter className="mt-6" />
       </div>
     </div>
   );

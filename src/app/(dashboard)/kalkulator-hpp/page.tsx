@@ -175,8 +175,8 @@ export default function KalkulatorHppPage() {
             <CardTitle className="text-base">Hasil Kalkulasi</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="rounded-lg border-2 border-[#0D0D0D] bg-[#F7F7F7] p-3 text-center">
-              <p className="text-xs text-[#9A9A9A] mb-1">HPP per Produk</p>
+            <div className="rounded-lg border border-border bg-muted p-3 text-center">
+              <p className="text-xs text-muted-foreground mb-1">HPP per Produk</p>
               <CurrencyDisplay amount={hpp} size="xl" className="font-bold text-primary-700" />
             </div>
 
@@ -190,7 +190,7 @@ export default function KalkulatorHppPage() {
                 return (
                   <div
                     key={margin}
-                    className="flex items-center justify-between rounded-lg border border-[#E5E7EB] p-3"
+                    className="flex items-center justify-between rounded-lg border border-border p-3"
                   >
                     <span className="text-sm font-semibold">{margin}%</span>
                     <div className="text-right">

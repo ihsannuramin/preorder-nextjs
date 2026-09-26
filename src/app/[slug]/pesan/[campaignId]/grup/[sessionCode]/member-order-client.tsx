@@ -9,13 +9,15 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { addMemberOrder } from "@/actions/group-orders";
-import { Users, Plus, Minus, ShoppingBag, Lock } from "lucide-react";
+import { PoweredByFooter } from "@/components/public/powered-by-footer";
+import { StoreIdentity } from "@/components/public/store-identity";
+import { Users, Plus, Minus, ShoppingBag } from "lucide-react";
 
 type GroupData = {
   id: string;
   sessionCode: string;
   facilitatorName: string;
-  status: "COLLECTING" | "CLOSED" | "PAYMENT_REVIEW" | "PAID" | "CANCELLED";
+  store: { name: string; logoUrl: string | null; brandColor: string | null };
   memberCount: number;
   campaign: {
     id: string;
@@ -69,8 +71,8 @@ export function MemberOrderClient({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!memberName.trim()) { toast.error("Masukkan nama kamu"); return; }
-    if (orderItems.length === 0) { toast.error("Pilih minimal 1 produk"); return; }
+    if (!memberName.trim()) { toast.error("Isi nama kamu dulu, ya."); return; }
+    if (orderItems.length === 0) { toast.error("Pilih minimal 1 produk dulu, ya."); return; }
 
     startTransition(async () => {
       const result = await addMemberOrder(sessionCode, memberName, orderItems);
@@ -82,29 +84,23 @@ export function MemberOrderClient({
     });
   }
 
-  if (group.status !== "COLLECTING") {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="text-center">
-          <Lock className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-          <p className="text-lg font-semibold">Sesi sudah ditutup</p>
-          <p className="text-sm text-muted-foreground mt-1">
-            {group.facilitatorName} telah menutup sesi ini. Hubungi mereka untuk info lebih lanjut.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-xl mx-auto px-4 py-8">
+        <div className="mb-4 text-center">
+          <StoreIdentity
+            name={group.store.name}
+            logoUrl={group.store.logoUrl}
+            brandColor={group.store.brandColor}
+            size="sm"
+          />
+        </div>
         <div className="mb-6 rounded-card bg-primary-50 border border-primary-200 p-4 flex items-start gap-3">
           <Users className="h-5 w-5 text-primary-600 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="font-semibold text-primary-900">Group Order oleh {group.facilitatorName}</p>
+            <p className="font-semibold text-primary-900">Pesanan grup {group.facilitatorName}</p>
             <p className="text-sm text-primary-700">{group.campaign.name}</p>
-            <p className="text-xs text-primary-600 mt-1">{group.memberCount} orang sudah pesan</p>
+            <p className="text-xs text-primary-600 mt-1">{group.memberCount} orang sudah pesan · tagihan dibayar {group.facilitatorName}</p>
           </div>
         </div>
 
@@ -179,6 +175,7 @@ export function MemberOrderClient({
             {isPending ? "Mengirim..." : "Kirim Pilihan"}
           </Button>
         </form>
+        <PoweredByFooter className="mt-8" />
       </div>
     </div>
   );

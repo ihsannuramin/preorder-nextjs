@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { HEX_COLOR } from "./payment-method";
 
 export const storeSchema = z.object({
   name: z.string().min(2, "Nama toko minimal 2 karakter"),
@@ -26,6 +27,7 @@ export const storeSchema = z.object({
     .optional()
     .or(z.literal("")),
   showGoogleMaps: z.boolean().optional(),
+  brandColor: z.string().regex(HEX_COLOR, "Warna toko tidak valid").nullable().optional(),
 });
 
 export type StoreInput = z.infer<typeof storeSchema>;

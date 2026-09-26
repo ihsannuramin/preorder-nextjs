@@ -40,6 +40,12 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum PaymentMethodType {
+  BANK_TRANSFER
+  EWALLET
+  QRIS
+}
+
 enum GroupOrderStatus {
   COLLECTING
   CLOSED
@@ -147,6 +153,8 @@ model Store {
   socialLinks Json?
   googleMapsUrl  String?
   showGoogleMaps Boolean  @default(false)
+  // Warna aksen toko di halaman pelanggan (#RRGGBB). Tombol & status tetap biru POHub.
+  brandColor  String?
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -156,8 +164,29 @@ model Store {
   ingredients Ingredient[]
   campaigns   Campaign[]
   orders      Order[]
+  paymentMethods StorePaymentMethod[]
 
   @@map("stores")
+}
+
+// Cara bayar yang ditampilkan ke pelanggan di halaman sukses & cek status.
+model StorePaymentMethod {
+  id            String            @id @default(cuid())
+  storeId       String
+  type          PaymentMethodType
+  providerName  String
+  accountNumber String?
+  accountName   String?
+  qrisImageUrl  String?
+  sortOrder     Int               @default(0)
+  isActive      Boolean           @default(true)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+  @@map("store_payment_methods")
 }
 
 model Product {

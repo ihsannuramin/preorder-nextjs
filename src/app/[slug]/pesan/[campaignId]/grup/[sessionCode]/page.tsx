@@ -1,4 +1,5 @@
 import { getPublicGroupOrder } from "@/actions/group-orders";
+import { PublicNotice } from "@/components/public/public-notice";
 import { MemberOrderClient } from "./member-order-client";
 
 export default async function MemberOrderPage({
@@ -9,22 +10,31 @@ export default async function MemberOrderPage({
   const { slug, campaignId, sessionCode } = await params;
   const groupOrder = await getPublicGroupOrder(sessionCode);
 
-  if (!groupOrder) {
+  const store = groupOrder?.campaign?.store;
+  if (!groupOrder || !store || store.slug !== slug || groupOrder.campaignId !== campaignId) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="text-center">
-          <p className="text-lg font-semibold">Sesi tidak ditemukan</p>
-          <p className="text-sm text-muted-foreground mt-1">Link ini tidak valid atau sudah kadaluarsa.</p>
-        </div>
-      </div>
+      <PublicNotice
+        title="Link pesanan grup tidak ditemukan"
+        message="Cek lagi link dari penanggung grup, ya."
+      />
+    );
+  }
+
+  if (groupOrder.status !== "COLLECTING") {
+    return (
+      <PublicNotice
+        store={store}
+        title="Pesanan grup ini sudah ditutup"
+        message={`${groupOrder.facilitatorName} sudah menutup pesanan grup ini. Kalau masih mau pesan, kabari ${groupOrder.facilitatorName} atau chat ${store.name}.`}
+      />
     );
   }
 
   const group = {
     id: groupOrder.id,
+    store: { name: store.name, logoUrl: store.logoUrl, brandColor: store.brandColor },
     sessionCode: groupOrder.sessionCode,
     facilitatorName: groupOrder.facilitatorName,
-    status: groupOrder.status,
     memberCount: groupOrder.memberOrders?.length ?? 0,
     campaign: {
       id: groupOrder.campaign!.id,

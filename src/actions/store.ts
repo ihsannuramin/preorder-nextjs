@@ -65,6 +65,7 @@ export async function createOrUpdateStore(
       socialLinks,
       googleMapsUrl: formData.get("googleMapsUrl") || undefined,
       showGoogleMaps: formData.get("showGoogleMaps") === "on",
+      brandColor: formData.get("brandColor") || null,
     };
 
     const parsed = storeSchema.safeParse(raw);

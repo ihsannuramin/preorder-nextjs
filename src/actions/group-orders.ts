@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { publicStoreSelect } from "@/lib/public-store";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createLogger } from "@/lib/logger";
@@ -33,9 +34,9 @@ export async function createGroupOrder(data: {
       where: { id: data.campaignId },
     });
 
-    if (!campaign) return { success: false, error: "Kampanye tidak ditemukan" };
-    if (campaign.status !== "OPEN") return { success: false, error: "Kampanye ini tidak sedang buka" };
-    if (new Date() > campaign.closeDate) return { success: false, error: "Kampanye sudah tutup" };
+    if (!campaign) return { success: false, error: "PO tidak ditemukan" };
+    if (campaign.status !== "OPEN") return { success: false, error: "PO ini sudah tutup. Chat toko buat tahu PO berikutnya." };
+    if (new Date() > campaign.closeDate) return { success: false, error: "PO ini sudah tutup. Chat toko buat tahu PO berikutnya." };
 
     const sessionCode = await generateSessionCode();
 
@@ -188,6 +189,7 @@ export async function getPublicGroupOrder(sessionCode: string) {
     include: {
       campaign: {
         include: {
+          store: { select: publicStoreSelect },
           products: {
             include: { product: true },
           },

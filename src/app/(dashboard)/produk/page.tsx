@@ -19,7 +19,7 @@ import type { ProductStatus } from "@prisma/client";
 const PAGE_SIZE = 10;
 
 const statusConfig: Record<ProductStatus, { label: string; variant: any }> = {
-  DRAFT: { label: "Draft", variant: "secondary" },
+  DRAFT: { label: "Draf", variant: "secondary" },
   PUBLISHED: { label: "Terbit", variant: "success" },
   ARCHIVED: { label: "Arsip", variant: "outline" },
 };
@@ -110,9 +110,9 @@ async function ProductList({ q, page }: { q?: string; page: number }) {
                       </p>
                     )}
                     {setupIncomplete && (
-                      <p className="flex items-center gap-1 text-xs text-warning mt-0.5 font-medium">
+                      <p className="flex items-center gap-1 text-xs text-warning-700 mt-0.5 font-medium">
                         <AlertTriangle className="h-3 w-3" />
-                        Resep belum lengkap
+                        Komposisi bahan belum lengkap
                       </p>
                     )}
                   </div>

@@ -61,8 +61,8 @@ export function ProfitSimulator({ hpp, product }: { hpp: number; product: Produc
             type="button"
             onClick={() => setMode(m)}
             className={cn(
-              "flex-1 text-sm font-semibold px-3 py-2 rounded-input border-2 border-[#0D0D0D] transition-colors",
-              mode === m ? "bg-[#FFD400] text-[#111111]" : "bg-white text-[#9A9A9A]"
+              "flex-1 text-sm font-semibold px-3 py-2 rounded-input border border-border transition-colors",
+              mode === m ? "bg-primary text-white" : "bg-white text-muted-foreground"
             )}
           >
             {m === "manual" ? "Manual" : m === "margin" ? "Target Margin" : "Markup"}
@@ -122,8 +122,8 @@ export function ProfitSimulator({ hpp, product }: { hpp: number; product: Produc
       )}
 
       {mode !== "manual" && (
-        <div className="rounded-lg border-2 border-[#0D0D0D] bg-[#F7F7F7] p-3 text-center">
-          <p className="text-xs text-[#9A9A9A] mb-1">Harga Jual yang Disarankan</p>
+        <div className="rounded-lg border border-border bg-muted p-3 text-center">
+          <p className="text-xs text-muted-foreground mb-1">Harga Jual yang Disarankan</p>
           <CurrencyDisplay
             amount={Number.isFinite(recommendedPrice) ? recommendedPrice : 0}
             size="lg"
@@ -137,25 +137,25 @@ export function ProfitSimulator({ hpp, product }: { hpp: number; product: Produc
       </Button>
 
       <div className="grid grid-cols-2 gap-3 pt-2 border-t">
-        <div className="rounded-lg border-2 border-[#0D0D0D] bg-[#F7F7F7] p-3 text-center">
-          <p className="text-xs text-[#9A9A9A] mb-1">Harga Jual Saat Ini</p>
+        <div className="rounded-lg border border-border bg-muted p-3 text-center">
+          <p className="text-xs text-muted-foreground mb-1">Harga Jual Saat Ini</p>
           <CurrencyDisplay amount={sellingPrice} size="sm" className="font-bold" />
         </div>
-        <div className="rounded-lg border-2 border-[#0D0D0D] bg-[#F7F7F7] p-3 text-center">
-          <p className="text-xs text-[#9A9A9A] mb-1">HPP</p>
-          <CurrencyDisplay amount={hpp} size="sm" className="font-bold text-[#9A9A9A]" />
+        <div className="rounded-lg border border-border bg-muted p-3 text-center">
+          <p className="text-xs text-muted-foreground mb-1">Modal (HPP)</p>
+          <CurrencyDisplay amount={hpp} size="sm" className="font-bold text-muted-foreground" />
         </div>
-        <div className="rounded-lg border-2 border-[#0D0D0D] bg-[#F7F7F7] p-3 text-center">
-          <p className="text-xs text-[#9A9A9A] mb-1">Profit</p>
+        <div className="rounded-lg border border-border bg-muted p-3 text-center">
+          <p className="text-xs text-muted-foreground mb-1">Profit</p>
           <CurrencyDisplay
             amount={profit}
             size="sm"
-            className={cn("font-bold", profit >= 0 ? "text-success" : "text-error")}
+            className={cn("font-bold", profit >= 0 ? "text-success-700" : "text-error")}
           />
         </div>
-        <div className="rounded-lg border-2 border-[#FFD400] bg-[#FFD400] p-3 text-center">
-          <p className="text-xs text-[#111111] mb-1">Margin</p>
-          <p className="font-bold text-sm text-[#111111]">{margin.toFixed(1)}%</p>
+        <div className="rounded-lg border border-primary-200 bg-primary-50 p-3 text-center">
+          <p className="text-xs text-foreground mb-1">Margin</p>
+          <p className="font-bold text-sm text-foreground">{margin.toFixed(1)}%</p>
         </div>
       </div>
     </div>

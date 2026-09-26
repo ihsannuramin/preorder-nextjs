@@ -90,23 +90,23 @@ export default function ProdukBaruPage() {
               <div
                 className={`w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all ${
                   step === i + 1
-                    ? "bg-[#FF3B6B] text-white border-[#0D0D0D] shadow-sticker-sm"
+                    ? "bg-primary text-white border-primary"
                     : step > i + 1
-                    ? "bg-[#FFD400] text-[#111111] border-[#0D0D0D]"
-                    : "bg-[#F7F7F7] text-[#9A9A9A] border-[#E5E7EB]"
+                    ? "bg-primary-50 text-primary-700 border-primary-200"
+                    : "bg-muted text-muted-foreground border-border"
                 }`}
               >
                 {i + 1}
               </div>
               <span
                 className={`text-xs hidden sm:block font-semibold ${
-                  step === i + 1 ? "text-[#111111]" : "text-[#9A9A9A]"
+                  step === i + 1 ? "text-foreground" : "text-muted-foreground"
                 }`}
               >
                 {s}
               </span>
               {i < steps.length - 1 && (
-                <div className="flex-1 h-0.5 bg-[#E5E7EB] mx-1 min-w-[20px]" />
+                <div className="flex-1 h-0.5 bg-border mx-1 min-w-[20px]" />
               )}
             </div>
           ))}
@@ -126,7 +126,7 @@ export default function ProdukBaruPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="name">Nama Produk <span className="text-[#FF3B6B]">*</span></Label>
+                <Label htmlFor="name">Nama Produk <span className="text-error">*</span></Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -171,13 +171,13 @@ export default function ProdukBaruPage() {
                     onClick={() => setCostMode("MANUAL")}
                     className={`rounded-lg border-2 p-3 text-left text-sm transition-all ${
                       costMode === "MANUAL"
-                        ? "border-[#0D0D0D] bg-[#FFD400] shadow-sticker-sm font-semibold"
-                        : "border-[#E5E7EB] text-[#9A9A9A]"
+                        ? "border-primary bg-primary-50 text-primary-700 font-semibold"
+                        : "border-border text-muted-foreground"
                     }`}
                   >
-                    Tanpa Bahan Baku (Cepat)
+                    Manual (Cepat)
                     <p className="text-[11px] font-normal mt-0.5">
-                      Langsung input harga modal, tanpa setup resep. Cocok untuk kebanyakan toko.
+                      Langsung isi modal per produk, tanpa atur komposisi bahan. Cocok buat mulai cepat.
                     </p>
                   </button>
                   <button
@@ -185,13 +185,13 @@ export default function ProdukBaruPage() {
                     onClick={() => setCostMode("RECIPE")}
                     className={`rounded-lg border-2 p-3 text-left text-sm transition-all ${
                       costMode === "RECIPE"
-                        ? "border-[#0D0D0D] bg-[#FFD400] shadow-sticker-sm font-semibold"
-                        : "border-[#E5E7EB] text-[#9A9A9A]"
+                        ? "border-primary bg-primary-50 text-primary-700 font-semibold"
+                        : "border-border text-muted-foreground"
                     }`}
                   >
-                    Pakai Resep (Bahan Baku)
+                    Pakai Komposisi Bahan
                     <p className="text-[11px] font-normal mt-0.5">
-                      Untuk F&amp;B yang ingin hitung HPP otomatis dari bahan baku.
+                      Untuk produk yang kamu buat sendiri dari bahan & material. Modal dan kebutuhan bahan dihitung otomatis.
                     </p>
                   </button>
                 </div>
@@ -213,7 +213,7 @@ export default function ProdukBaruPage() {
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="basePrice">
-                  Harga Jual <span className="text-[#FF3B6B]">*</span>
+                  Harga Jual <span className="text-error">*</span>
                 </Label>
                 <CurrencyInput
                   id="basePrice"
@@ -227,7 +227,7 @@ export default function ProdukBaruPage() {
               {costMode === "MANUAL" && (
                 <div className="space-y-1.5">
                   <Label htmlFor="manualCostPrice">
-                    Harga Modal <span className="text-[#FF3B6B]">*</span>
+                    Harga Modal <span className="text-error">*</span>
                   </Label>
                   <CurrencyInput
                     id="manualCostPrice"
@@ -238,15 +238,15 @@ export default function ProdukBaruPage() {
                     placeholder="15.000"
                     required
                   />
-                  <p className="text-[11px] text-[#9A9A9A]">Biaya modal per item, misalnya harga beli/produksi.</p>
+                  <p className="text-[11px] text-muted-foreground">Biaya modal per item, misalnya harga beli/produksi.</p>
                 </div>
               )}
 
               {/* Summary */}
-              <div className="rounded-lg border-2 border-[#0D0D0D] p-4 bg-[#F7F7F7] space-y-2 shadow-sticker-sm">
-                <p className="text-sm font-bold text-[#111111]">Ringkasan Produk</p>
+              <div className="rounded-lg border border-border p-4 bg-muted space-y-2 shadow-sm">
+                <p className="text-sm font-bold text-foreground">Ringkasan Produk</p>
                 {images[0] && (
-                  <div className="w-12 h-12 rounded-lg border-2 border-[#0D0D0D] overflow-hidden">
+                  <div className="w-12 h-12 rounded-lg border border-border overflow-hidden">
                     <img
                       src={images[0]}
                       alt="preview"
@@ -254,10 +254,10 @@ export default function ProdukBaruPage() {
                     />
                   </div>
                 )}
-                <p className="text-sm text-[#9A9A9A]">Nama: <span className="text-[#111111] font-semibold">{formData.name || "—"}</span></p>
-                <p className="text-sm text-[#9A9A9A]">
+                <p className="text-sm text-muted-foreground">Nama: <span className="text-foreground font-semibold">{formData.name || "—"}</span></p>
+                <p className="text-sm text-muted-foreground">
                   Status:{" "}
-                  <span className="inline-flex items-center rounded-full bg-[#F7F7F7] border border-[#E5E7EB] px-2 py-0.5 text-xs font-semibold text-[#111111]">
+                  <span className="inline-flex items-center rounded-full bg-muted border border-border px-2 py-0.5 text-xs font-semibold text-foreground">
                     Draft
                   </span>
                 </p>
