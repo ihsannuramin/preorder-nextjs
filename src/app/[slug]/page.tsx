@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { CloseCountdown } from "@/components/public/close-countdown";
 import { PoweredByFooter } from "@/components/public/powered-by-footer";
 import { StoreIdentity } from "@/components/public/store-identity";
+import { PublicNotice } from "@/components/public/public-notice";
+import { ShareStoreButton } from "@/components/public/share-store-button";
 import { StoreBannerCarousel } from "@/components/public/store-banner-carousel";
 import { RichTextContent } from "@/components/shared/rich-text-content";
 import { ProductGrid, type PublicProduct } from "@/components/public/product-grid";
@@ -73,6 +75,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const store = await prisma.store.findUnique({ where: { slug } });
   if (!store) return { title: "Toko tidak ditemukan" };
+  if (!store.isActive) return { title: { absolute: store.name }, robots: { index: false } };
   const plainDescription = store.description
     ? richTextToPlain(store.description).slice(0, 160)
     : "";
@@ -96,7 +99,7 @@ export default async function PublicStorePage({
   const { slug } = await params;
 
   const store = await prisma.store.findFirst({
-    where: { slug, isActive: true },
+    where: { slug },
     include: {
       products: {
         where: { status: "PUBLISHED" },
@@ -119,6 +122,18 @@ export default async function PublicStorePage({
   });
 
   if (!store) notFound();
+
+  if (!store.isActive) {
+    // Toko dinonaktifkan admin: tanpa kontak WA & link, hanya pemberitahuan.
+    return (
+      <PublicNotice
+        store={{ ...store, whatsapp: null }}
+        title="Toko sedang tidak aktif"
+        message="Halaman toko ini sedang tidak tersedia dan tidak menerima pesanan."
+        showStoreLink={false}
+      />
+    );
+  }
 
   const socialLinks: StoreSocialLink[] =
     Array.isArray(store.socialLinks) && store.socialLinks.length > 0
@@ -198,6 +213,7 @@ export default async function PublicStorePage({
                 </a>
               </Button>
             )}
+            <ShareStoreButton storeName={store.name} />
           </div>
         </div>
 

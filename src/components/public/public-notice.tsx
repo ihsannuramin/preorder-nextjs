@@ -21,10 +21,13 @@ export function PublicNotice({
   store,
   title,
   message,
+  showStoreLink = true,
 }: {
   store?: NoticeStore | null;
   title: string;
   message: string;
+  /** false untuk halaman toko itu sendiri (hindari link ke dirinya). */
+  showStoreLink?: boolean;
 }) {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
@@ -56,12 +59,14 @@ export function PublicNotice({
                 </a>
               </Button>
             )}
-            <Button asChild variant="outline" className="w-full">
-              <Link href={`/${store.slug}`}>
-                <Home className="h-4 w-4 mr-2" />
-                Kembali ke Toko
-              </Link>
-            </Button>
+            {showStoreLink && (
+              <Button asChild variant="outline" className="w-full">
+                <Link href={`/${store.slug}`}>
+                  <Home className="h-4 w-4 mr-2" />
+                  Kembali ke Toko
+                </Link>
+              </Button>
+            )}
           </div>
         )}
 

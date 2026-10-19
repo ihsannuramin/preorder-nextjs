@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import { StoreIdentity } from "@/components/public/store-identity";
 import { buildChatSellerMessage, buildPaymentProofFollowupMessage, buildWaLink } from "@/lib/utils/whatsapp";
 import { MessageCircle, CheckCircle2, Circle } from "lucide-react";
 import type { OrderStatus } from "@prisma/client";
+import { formatDateTime, formatRelative } from "@/lib/utils/date";
 import type { getPublicOrder } from "@/actions/orders";
 
 type OrderData = NonNullable<Awaited<ReturnType<typeof getPublicOrder>>>;
@@ -24,11 +26,29 @@ const STEPS: { status: OrderStatus; label: string }[] = [
   { status: "COMPLETED", label: "Selesai" },
 ];
 
+const AUTO_REFRESH_MS = 30_000;
+const AUTO_REFRESH_STATUSES: OrderStatus[] = ["PAYMENT_REVIEW", "PAID", "PRODUCTION", "READY"];
+
+function stepLabel(step: (typeof STEPS)[number], isPickup: boolean): string {
+  if (step.status !== "READY") return step.label;
+  return isPickup ? "Siap diambil di toko" : "Siap dikirim";
+}
+
 export function TrackingClient({ order }: { order: OrderData }) {
   const router = useRouter();
   const currentStepIndex = STEPS.findIndex((s) => s.status === order.status);
   const canUploadProof = order.status === "PENDING_PAYMENT";
   const isAwaitingVerification = order.status === "PAYMENT_REVIEW";
+  const isPickup = order.fulfillmentMethod === "PICKUP";
+
+  // Status berubah dari sisi toko: muat ulang berkala selama tab terlihat.
+  useEffect(() => {
+    if (!AUTO_REFRESH_STATUSES.includes(order.status)) return;
+    const timer = setInterval(() => {
+      if (document.visibilityState === "visible") router.refresh();
+    }, AUTO_REFRESH_MS);
+    return () => clearInterval(timer);
+  }, [order.status, router]);
 
   const chatSellerLink = order.store.whatsapp
     ? buildWaLink(
@@ -80,12 +100,21 @@ export function TrackingClient({ order }: { order: OrderData }) {
                         <Circle className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                       )}
                       <span className={done ? "font-medium text-foreground" : "text-muted-foreground"}>
-                        {step.label}
+                        {stepLabel(step, isPickup)}
+                        {step.status === "PAID" && done && order.verifiedAt && (
+                          <span className="block text-xs font-normal text-muted-foreground">
+                            {formatDateTime(order.verifiedAt)}
+                          </span>
+                        )}
                       </span>
                     </div>
                   );
                 })}
               </div>
+              <p className="mt-4 border-t border-border pt-3 text-xs text-muted-foreground" suppressHydrationWarning>
+                {isPickup ? "Ambil sendiri di toko" : "Diantar ke alamatmu"} · Diperbarui{" "}
+                {formatRelative(order.updatedAt)}
+              </p>
             </CardContent>
           </Card>
         )}
@@ -164,8 +193,6 @@ export function TrackingClient({ order }: { order: OrderData }) {
         </div>
       )}
 
-      <PoweredByFooter />
-
       {chatSellerLink && (
         <div className="hidden md:block max-w-xl mx-auto px-4">
           <Button asChild className="w-full bg-green-500 hover:bg-green-600 text-white border-0">
@@ -176,6 +203,8 @@ export function TrackingClient({ order }: { order: OrderData }) {
           </Button>
         </div>
       )}
+
+      <PoweredByFooter className="mt-6" />
     </div>
   );
 }

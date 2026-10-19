@@ -234,7 +234,10 @@ export async function getPublicOrder(orderId: string) {
     totalAmount: Number(order.totalAmount),
     paymentProofUrl: order.paymentProofUrl,
     rejectionReason: order.rejectionReason,
+    fulfillmentMethod: order.fulfillmentMethod,
     createdAt: order.createdAt,
+    updatedAt: order.updatedAt,
+    verifiedAt: order.verifiedAt,
     items: order.items.map((item) => ({
       id: item.id,
       productName: item.productName,
