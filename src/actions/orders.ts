@@ -114,6 +114,7 @@ export async function createPublicOrder(data: {
     });
 
     if (!campaign) return { success: false, error: "PO ini tidak ditemukan. Cek lagi link dari toko, ya." };
+    if (!campaign.store.isActive) return { success: false, error: "Toko ini sedang tidak menerima pesanan." };
     if (campaign.status !== "OPEN") return { success: false, error: "PO ini sudah tutup. Chat toko buat tahu PO berikutnya." };
     if (new Date() > campaign.closeDate) return { success: false, error: "PO ini sudah tutup. Chat toko buat tahu PO berikutnya." };
 

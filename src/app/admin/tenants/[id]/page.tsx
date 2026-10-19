@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { TenantStatusActions } from "@/components/admin/suspend-tenant-dialog";
+import { DeleteTenantButton } from "@/components/admin/delete-tenant-dialog";
 import { formatDate, formatDateTime } from "@/lib/utils/date";
 import { ExternalLink } from "lucide-react";
 import { ORDER_STATUS, CAMPAIGN_STATUS } from "@/lib/constants/status";
@@ -27,7 +28,22 @@ export default async function AdminTenantDetailPage({
       <PageHeader
         title={store.name}
         description={`/${store.slug}`}
-        actions={<TenantStatusActions storeId={store.id} isActive={store.isActive} />}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <TenantStatusActions storeId={store.id} isActive={store.isActive} />
+            <DeleteTenantButton
+              storeId={store.id}
+              slug={store.slug}
+              storeName={store.name}
+              ownerEmail={store.user.email}
+              counts={{
+                products: store._count.products,
+                campaigns: store._count.campaigns,
+                orders: orderCount,
+              }}
+            />
+          </div>
+        }
       />
 
       <div className="grid md:grid-cols-3 gap-4 mb-4">

@@ -5,6 +5,9 @@ import { prisma } from "@/lib/prisma";
 import { getAdminUser } from "@/lib/auth/admin";
 import { getStoreFinanceSummary } from "@/lib/utils/finance";
 import { logAdminAction } from "@/lib/utils/admin-audit";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { collectStoragePaths } from "@/lib/utils/storage-path";
+import { PAYMENT_PROOF_BUCKET } from "@/lib/utils/payment-proof";
 import { createLogger } from "@/lib/logger";
 import type { ActionResult } from "@/types";
 
@@ -154,6 +157,121 @@ export async function suspendTenant(storeId: string, reason: string): Promise<Ac
     return { success: true, data: undefined };
   } catch (err) {
     logger.error("suspendTenant failed", err);
+    return { success: false, error: "Terjadi kesalahan" };
+  }
+}
+
+const PRODUCT_IMAGE_BUCKET = "product-images";
+const STORAGE_REMOVE_CHUNK = 100;
+
+async function removeStorageFiles(bucket: string, paths: string[]) {
+  if (paths.length === 0) return;
+  const admin = createAdminClient();
+  for (let i = 0; i < paths.length; i += STORAGE_REMOVE_CHUNK) {
+    const chunk = paths.slice(i, i + STORAGE_REMOVE_CHUNK);
+    const { error } = await admin.storage.from(bucket).remove(chunk);
+    if (error) logger.warn("removeStorageFiles failed", { bucket, count: chunk.length, message: error.message });
+  }
+}
+
+/**
+ * Hapus permanen tenant: akun login Supabase, user, toko, dan seluruh datanya
+ * (produk, PO, pesanan, bahan baku — via cascade), plus file di storage.
+ * Email & slug jadi bebas sehingga pemilik bisa mendaftar ulang dari awal.
+ */
+export async function deleteTenantPermanently(
+  storeId: string,
+  confirmSlug: string,
+  reason: string,
+): Promise<ActionResult> {
+  try {
+    const admin = await getAdminUser();
+    if (!reason.trim()) {
+      return { success: false, error: "Alasan penghapusan wajib diisi" };
+    }
+
+    const store = await prisma.store.findUnique({
+      where: { id: storeId },
+      include: {
+        user: true,
+        products: { select: { imageUrl: true, images: true } },
+        paymentMethods: { select: { qrisImageUrl: true } },
+        orders: { select: { paymentProofUrl: true } },
+        campaigns: { select: { groupOrders: { select: { paymentProofUrl: true } } } },
+        _count: { select: { products: true, campaigns: true, orders: true } },
+      },
+    });
+    if (!store) return { success: false, error: "Toko tidak ditemukan" };
+    if (confirmSlug.trim() !== store.slug) {
+      return { success: false, error: "Slug konfirmasi tidak cocok" };
+    }
+    if (store.user.role === "SUPER_ADMIN" || store.user.id === admin.id) {
+      return { success: false, error: "Akun super admin tidak bisa dihapus dari sini" };
+    }
+
+    // Akun login dihapus lebih dulu: bila gagal, belum ada data yang hilang.
+    // "User not found" dianggap sukses agar penghapusan bisa diulang.
+    const supabaseAdmin = createAdminClient();
+    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(store.user.supabaseId);
+    if (authError && authError.status !== 404) {
+      logger.error("deleteTenantPermanently: auth deleteUser failed", authError);
+      return { success: false, error: "Gagal menghapus akun login tenant. Coba lagi." };
+    }
+
+    // Cascade: users → stores → produk, PO, pesanan, bahan baku, dll.
+    await prisma.user.delete({ where: { id: store.user.id } });
+
+    await logAdminAction(
+      { id: admin.id, email: admin.email },
+      "DELETE_STORE",
+      {
+        targetStoreId: store.id,
+        targetUserId: store.user.id,
+        metadata: {
+          reason,
+          storeName: store.name,
+          slug: store.slug,
+          ownerEmail: store.user.email,
+          products: store._count.products,
+          campaigns: store._count.campaigns,
+          orders: store._count.orders,
+        },
+      },
+    );
+
+    // Bersihkan file setelah data terhapus (best effort, tidak menggagalkan aksi).
+    await Promise.all([
+      removeStorageFiles(
+        PRODUCT_IMAGE_BUCKET,
+        collectStoragePaths(
+          [
+            store.logoUrl,
+            store.coverUrl,
+            ...store.bannerUrls,
+            ...store.products.flatMap((p) => [p.imageUrl, ...p.images]),
+            ...store.paymentMethods.map((m) => m.qrisImageUrl),
+          ],
+          PRODUCT_IMAGE_BUCKET,
+        ),
+      ),
+      removeStorageFiles(
+        PAYMENT_PROOF_BUCKET,
+        collectStoragePaths(
+          [
+            ...store.orders.map((o) => o.paymentProofUrl),
+            ...store.campaigns.flatMap((c) => c.groupOrders.map((g) => g.paymentProofUrl)),
+          ],
+          PAYMENT_PROOF_BUCKET,
+        ),
+      ),
+    ]);
+
+    revalidatePath("/admin/tenants");
+    revalidatePath("/admin");
+    revalidatePath(`/${store.slug}`);
+    return { success: true, data: undefined };
+  } catch (err) {
+    logger.error("deleteTenantPermanently failed", err);
     return { success: false, error: "Terjadi kesalahan" };
   }
 }

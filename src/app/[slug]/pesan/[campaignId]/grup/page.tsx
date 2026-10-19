@@ -19,7 +19,7 @@ async function getCampaign(slug: string, campaignId: string) {
       store: { select: publicStoreSelect },
     },
   });
-  if (!campaign || campaign.store.slug !== slug) return null;
+  if (!campaign || campaign.store.slug !== slug || !campaign.store.isActive) return null;
   return campaign;
 }
 

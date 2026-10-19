@@ -32,9 +32,11 @@ export async function createGroupOrder(data: {
   try {
     const campaign = await prisma.campaign.findUnique({
       where: { id: data.campaignId },
+      include: { store: { select: { isActive: true } } },
     });
 
     if (!campaign) return { success: false, error: "PO tidak ditemukan" };
+    if (!campaign.store.isActive) return { success: false, error: "Toko ini sedang tidak menerima pesanan." };
     if (campaign.status !== "OPEN") return { success: false, error: "PO ini sudah tutup. Chat toko buat tahu PO berikutnya." };
     if (new Date() > campaign.closeDate) return { success: false, error: "PO ini sudah tutup. Chat toko buat tahu PO berikutnya." };
 
@@ -66,9 +68,11 @@ export async function addMemberOrder(
   try {
     const groupOrder = await prisma.groupOrder.findUnique({
       where: { sessionCode },
+      include: { campaign: { select: { store: { select: { isActive: true } } } } },
     });
 
     if (!groupOrder) return { success: false, error: "Sesi tidak ditemukan" };
+    if (!groupOrder.campaign.store.isActive) return { success: false, error: "Toko ini sedang tidak menerima pesanan." };
     if (groupOrder.status !== "COLLECTING") return { success: false, error: "Sesi ini sudah ditutup" };
     if (!memberName.trim()) return { success: false, error: "Nama tidak boleh kosong" };
     if (items.length === 0) return { success: false, error: "Pilih minimal 1 produk" };

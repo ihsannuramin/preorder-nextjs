@@ -29,7 +29,7 @@ async function getCampaign(slug: string, campaignId: string) {
     },
   });
 
-  if (!campaign || campaign.store.slug !== slug) return null;
+  if (!campaign || campaign.store.slug !== slug || !campaign.store.isActive) return null;
 
   return {
     id: campaign.id,

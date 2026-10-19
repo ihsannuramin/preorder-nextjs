@@ -6,6 +6,7 @@ import type { Prisma } from "@prisma/client";
  */
 export const publicStoreSelect = {
   name: true,
+  isActive: true,
   slug: true,
   whatsapp: true,
   logoUrl: true,
