@@ -2,12 +2,12 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { formatDate } from "@/lib/utils/date";
 import { PoweredByFooter } from "@/components/public/powered-by-footer";
 import { StoreIdentity } from "@/components/public/store-identity";
 import { StoreBannerCarousel } from "@/components/public/store-banner-carousel";
 import { RichTextContent } from "@/components/shared/rich-text-content";
+import { ProductGrid, type PublicProduct } from "@/components/public/product-grid";
 import { isRichTextEmpty, richTextToPlain } from "@/lib/utils/rich-text";
 import {
   MessageCircle,
@@ -21,7 +21,6 @@ import {
   MapPin,
 } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
 import {
   getSocialPlatform,
@@ -128,6 +127,16 @@ export default async function PublicStorePage({
         ? [{ platform: "instagram", value: store.instagram }]
         : [];
   const hasBanners = store.bannerUrls.length > 0;
+  const publicProducts: PublicProduct[] = store.products.map((product) => ({
+    id: product.id,
+    name: product.name,
+    price: Number(product.basePrice),
+    description: product.description,
+    images: product.images.length > 0 ? product.images : product.imageUrl ? [product.imageUrl] : [],
+    openCampaigns: store.campaigns
+      .filter((c) => c.products.some((cp) => cp.productId === product.id))
+      .map((c) => ({ id: c.id, name: c.name })),
+  }));
 
   return (
     <div className="min-h-screen bg-background">
@@ -235,39 +244,10 @@ export default async function PublicStorePage({
           </section>
         )}
 
-        {store.products.length > 0 && (
+        {publicProducts.length > 0 && (
           <div>
             <h2 className="text-lg font-semibold mb-3">Produk</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {store.products.map((product) => (
-                <div
-                  key={product.id}
-                  className="rounded-card border border-border bg-white overflow-hidden"
-                >
-                  <div className="relative aspect-video bg-muted flex items-center justify-center overflow-hidden">
-                    {product.imageUrl ? (
-                      <Image
-                        src={product.imageUrl}
-                        alt={product.name}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 640px) 100vw, 50vw"
-                      />
-                    ) : (
-                      <Package className="h-8 w-8 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div className="p-3">
-                    <p className="font-semibold text-sm">{product.name}</p>
-                    <CurrencyDisplay
-                      amount={Number(product.basePrice)}
-                      size="sm"
-                      className="text-primary-700 font-medium mt-0.5"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <ProductGrid products={publicProducts} slug={store.slug} />
           </div>
         )}
 
