@@ -5,6 +5,7 @@ import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { getPublicOrder } from "@/actions/orders";
 import { PoweredByFooter } from "@/components/public/powered-by-footer";
 import { PaymentInstructions } from "@/components/public/payment-instructions";
+import { OrderLinkActions } from "@/components/public/order-link-actions";
 import { buildChatSellerMessage, buildWaLink } from "@/lib/utils/whatsapp";
 import { CheckCircle, Home, MessageCircle, MapPin } from "lucide-react";
 
@@ -53,18 +54,15 @@ export default async function SuksesPage({
 
         {order && (
           <div className="rounded-card border border-border bg-muted p-4 mb-6 text-left space-y-2">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Nomor Pesananmu</p>
-              <p className="text-xl font-bold text-primary-700">{order.orderNumber}</p>
-            </div>
-            <div className="flex justify-between items-center border-t border-border pt-2">
+            <div className="flex justify-between items-center border-b border-border pb-2">
               <span className="text-sm text-muted-foreground">Total</span>
               <CurrencyDisplay amount={order.totalAmount} size="lg" className="text-primary-700 font-bold" />
             </div>
-            <p className="text-xs text-muted-foreground">
-              Pesananmu sudah tercatat dengan nomor {order.orderNumber}. Simpan link cek status
-              buat lihat pesananmu kapan aja.
-            </p>
+            <OrderLinkActions
+              orderId={order.id}
+              orderNumber={order.orderNumber}
+              storeName={order.store.name}
+            />
           </div>
         )}
 
