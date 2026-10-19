@@ -8,11 +8,15 @@ export const storeSchema = z.object({
     .min(3, "Slug minimal 3 karakter")
     .max(50, "Slug maksimal 50 karakter")
     .regex(/^[a-z0-9-]+$/, "Slug hanya boleh huruf kecil, angka, dan tanda hubung"),
-  description: z.string().optional(),
+  description: z.string().max(20000, "Deskripsi toko terlalu panjang").nullable().optional(),
   whatsapp: z.string().optional(),
   instagram: z.string().optional(),
   logoUrl: z.string().optional(),
   coverUrl: z.string().optional(),
+  bannerUrls: z
+    .array(z.string().url("Link banner tidak valid"))
+    .max(5, "Maksimal 5 banner")
+    .optional(),
   socialLinks: z
     .array(
       z.object({

@@ -148,6 +148,8 @@ model Store {
   description String?
   logoUrl     String?
   coverUrl    String?
+  // Banner carousel di halaman pelanggan (opsional, maks 5, rasio 2:1).
+  bannerUrls  String[] @default([])
   whatsapp    String?
   instagram   String?
   socialLinks Json?

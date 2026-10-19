@@ -6,6 +6,12 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { storeSchema } from "@/lib/validations/store";
 import { isReservedSlug } from "@/lib/utils/slug";
+import {
+  isRichTextEmpty,
+  richTextToPlain,
+  sanitizeStoreDescription,
+} from "@/lib/utils/rich-text";
+import { STORE_DESCRIPTION_MAX_CHARS } from "@/components/shared/rich-text-classes";
 import { createLogger } from "@/lib/logger";
 import type { ActionResult } from "@/types";
 import type { Store } from "@prisma/client";
@@ -54,10 +60,33 @@ export async function createOrUpdateStore(
       }
     }
 
+    const bannerUrlsRaw = formData.get("bannerUrls");
+    let bannerUrls: string[] | undefined;
+    if (typeof bannerUrlsRaw === "string" && bannerUrlsRaw) {
+      try {
+        bannerUrls = JSON.parse(bannerUrlsRaw);
+      } catch {
+        return { success: false, error: "Format banner tidak valid" };
+      }
+    }
+
+    const descriptionRaw = formData.get("description");
+    const description =
+      typeof descriptionRaw === "string" && !isRichTextEmpty(descriptionRaw)
+        ? sanitizeStoreDescription(descriptionRaw)
+        : null;
+    if (description && richTextToPlain(description).length > STORE_DESCRIPTION_MAX_CHARS) {
+      return {
+        success: false,
+        error: `Deskripsi toko maksimal ${STORE_DESCRIPTION_MAX_CHARS} karakter`,
+      };
+    }
+
     const raw = {
       name: formData.get("name"),
       slug: formData.get("slug"),
-      description: formData.get("description") || undefined,
+      description,
+      bannerUrls,
       whatsapp: formData.get("whatsapp") || undefined,
       instagram: formData.get("instagram") || undefined,
       logoUrl: formData.get("logoUrl") || undefined,
@@ -93,6 +122,7 @@ export async function createOrUpdateStore(
         data: parsed.data,
       });
       revalidatePath("/toko");
+      revalidatePath(`/${store.slug}`);
       return { success: true, data: store };
     } else {
       const slugTaken = await prisma.store.findUnique({
@@ -105,6 +135,7 @@ export async function createOrUpdateStore(
         data: { ...parsed.data, userId: user.id },
       });
       revalidatePath("/toko");
+      revalidatePath(`/${store.slug}`);
       return { success: true, data: store };
     }
   } catch (err) {

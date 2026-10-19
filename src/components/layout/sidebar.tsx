@@ -16,8 +16,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
-import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
+import { useSignOut } from "@/hooks/use-sign-out";
 
 const navItems = [
   { href: "/dashboard", label: "Beranda", icon: LayoutDashboard },
@@ -33,13 +32,7 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
-
-  async function handleSignOut() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/masuk");
-  }
+  const { signOut, isSigningOut } = useSignOut();
 
   return (
     <aside className="hidden md:flex w-60 flex-col fixed left-0 top-0 h-full bg-white border-r-2 border-border z-40">
@@ -85,11 +78,12 @@ export function Sidebar() {
 
       <div className="p-3 border-t-2 border-border">
         <button
-          onClick={handleSignOut}
-          className="flex items-center gap-3 px-3 py-2.5 w-full rounded-full text-sm font-semibold text-muted-foreground hover:bg-error-50 hover:text-error transition-all duration-150"
+          onClick={signOut}
+          disabled={isSigningOut}
+          className="flex items-center gap-3 px-3 py-2.5 w-full rounded-full text-sm font-semibold text-muted-foreground hover:bg-error-50 hover:text-error transition-all duration-150 disabled:opacity-50"
         >
           <LogOut className="h-4 w-4" />
-          Keluar
+          {isSigningOut ? "Keluar..." : "Keluar"}
         </button>
       </div>
     </aside>

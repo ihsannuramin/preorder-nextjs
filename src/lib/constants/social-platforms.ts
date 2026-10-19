@@ -15,6 +15,13 @@ export const SOCIAL_PLATFORMS: SocialPlatform[] = [
     stripChars: /^@/,
   },
   {
+    value: "threads",
+    label: "Threads",
+    placeholder: "@namatoko",
+    urlPrefix: "https://www.threads.net/@",
+    stripChars: /^@/,
+  },
+  {
     value: "tiktok",
     label: "TikTok",
     placeholder: "@namatoko",

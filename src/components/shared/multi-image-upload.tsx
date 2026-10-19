@@ -14,6 +14,13 @@ interface MultiImageUploadProps {
   max?: number;
   disabled?: boolean;
   className?: string;
+  /** Teks bantuan di bawah grid. Default: petunjuk foto produk. */
+  hint?: React.ReactNode;
+  altPrefix?: string;
+  /** Label untuk foto pertama; null = tanpa label. */
+  coverLabel?: string | null;
+  gridClassName?: string;
+  aspectClassName?: string;
 }
 
 const BUCKET = "product-images";
@@ -26,6 +33,11 @@ export function MultiImageUpload({
   max = 5,
   disabled,
   className,
+  hint,
+  altPrefix = "Foto produk",
+  coverLabel = "Sampul",
+  gridClassName = "grid-cols-3",
+  aspectClassName = "aspect-square",
 }: MultiImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -83,22 +95,22 @@ export function MultiImageUpload({
 
   return (
     <div className={cn("w-full", className)}>
-      <div className="grid grid-cols-3 gap-2">
+      <div className={cn("grid gap-2", gridClassName)}>
         {value.map((url, index) => (
           <div
             key={url + index}
-            className="relative group aspect-square rounded-lg border border-border shadow-sm overflow-hidden bg-muted"
+            className={cn("relative group rounded-lg border border-border shadow-sm overflow-hidden bg-muted", aspectClassName)}
           >
             <Image
               src={url}
-              alt={`Foto produk ${index + 1}`}
+              alt={`${altPrefix} ${index + 1}`}
               fill
               className="object-cover"
               sizes="120px"
             />
-            {index === 0 && (
+            {index === 0 && coverLabel && (
               <span className="absolute top-1 left-1 bg-primary border border-primary text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
-                Sampul
+                {coverLabel}
               </span>
             )}
             <button
@@ -119,7 +131,8 @@ export function MultiImageUpload({
             disabled={isDisabled}
             onClick={() => inputRef.current?.click()}
             className={cn(
-              "aspect-square flex flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border-strong bg-muted hover:bg-primary-50 hover:border-primary hover:border-solid transition-all duration-150",
+              aspectClassName,
+              "flex flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border-strong bg-muted hover:bg-primary-50 hover:border-primary hover:border-solid transition-all duration-150",
               isDisabled && "opacity-50 cursor-not-allowed"
             )}
           >
@@ -135,7 +148,7 @@ export function MultiImageUpload({
         )}
       </div>
       <p className="text-[11px] text-muted-foreground mt-1.5">
-        Foto pertama jadi foto sampul. Maks {max} foto, JPG/PNG/WebP, 5MB per foto.
+        {hint ?? <>Foto pertama jadi foto sampul. Maks {max} foto, JPG/PNG/WebP, 5MB per foto.</>}
       </p>
 
       <input

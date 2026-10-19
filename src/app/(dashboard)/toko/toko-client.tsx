@@ -5,7 +5,9 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/shared/rich-text-editor";
+import { MultiImageUpload } from "@/components/shared/multi-image-upload";
+import { STORE_DESCRIPTION_MAX_CHARS } from "@/components/shared/rich-text-classes";
 import {
   Select,
   SelectContent,
@@ -47,10 +49,12 @@ export function TokoClient({
   initialStore,
   businessName,
   isWelcome,
+  initialDescriptionHtml,
 }: {
   initialStore: StoreSetupData["store"];
   businessName: string;
   isWelcome: boolean;
+  initialDescriptionHtml: string;
 }) {
   const [isPending, startTransition] = useTransition();
   const [store, setStore] = useState(initialStore);
@@ -59,6 +63,8 @@ export function TokoClient({
   );
   const [name, setName] = useState(initialStore?.name ?? businessName);
   const [logoUrl, setLogoUrl] = useState(initialStore?.logoUrl ?? "");
+  const [bannerUrls, setBannerUrls] = useState<string[]>(initialStore?.bannerUrls ?? []);
+  const [description, setDescription] = useState(initialDescriptionHtml);
   const [whatsapp, setWhatsapp] = useState(
     initialStore?.whatsapp?.replace(/^62/, "") ?? "",
   );
@@ -101,6 +107,8 @@ export function TokoClient({
   function handleSubmit(formData: FormData) {
     formData.set("slug", slug);
     formData.set("logoUrl", logoUrl);
+    formData.set("bannerUrls", JSON.stringify(bannerUrls));
+    formData.set("description", description);
     formData.set("whatsapp", whatsapp ? `62${whatsapp}` : "");
     formData.set(
       "socialLinks",
@@ -203,6 +211,30 @@ export function TokoClient({
             </div>
 
             <div className="space-y-1.5">
+              <Label>
+                Banner Toko{" "}
+                <span className="text-muted-foreground font-normal text-xs">(opsional)</span>
+              </Label>
+              <MultiImageUpload
+                value={bannerUrls}
+                onChange={setBannerUrls}
+                folder="store-banners"
+                max={5}
+                altPrefix="Banner toko"
+                coverLabel={null}
+                gridClassName="grid-cols-2"
+                aspectClassName="aspect-[2/1]"
+                hint={
+                  <>
+                    Ukuran disarankan <strong>1600 × 800 px</strong> (rasio 2:1), JPG/PNG/WebP
+                    maks 5MB. Taruh teks/objek penting di tengah agar tidak terpotong di layar HP.
+                    Maks 5 banner, tampil bergantian sesuai urutan. Kosongkan jika tidak perlu.
+                  </>
+                }
+              />
+            </div>
+
+            <div className="space-y-1.5">
               <Label>Warna Toko</Label>
               <div className="flex flex-wrap items-center gap-2">
                 {BRAND_COLOR_PRESETS.map((c) => (
@@ -285,13 +317,17 @@ export function TokoClient({
 
             <div className="space-y-1.5">
               <Label htmlFor="description">Deskripsi Toko</Label>
-              <Textarea
+              <RichTextEditor
                 id="description"
-                name="description"
-                defaultValue={store?.description ?? ""}
-                placeholder="Ceritakan tentang toko kamu..."
-                rows={3}
+                value={description}
+                onChange={setDescription}
+                placeholder="Ceritakan tentang toko kamu, keunggulan produk, jadwal PO, area pengiriman..."
+                maxLength={STORE_DESCRIPTION_MAX_CHARS}
               />
+              <p className="text-[11px] text-muted-foreground">
+                Tampil di bagian &quot;Tentang Toko&quot; di halaman publik. Pakai judul, poin, dan
+                teks tebal agar mudah dibaca.
+              </p>
             </div>
 
             <div className="space-y-1.5">

@@ -14,8 +14,10 @@ import {
   TrendingUp,
   FileText,
   Calculator,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { useSignOut } from "@/hooks/use-sign-out";
 import {
   Dialog,
   DialogContent,
@@ -41,6 +43,7 @@ const moreItems = [
 export function BottomNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { signOut, isSigningOut } = useSignOut();
 
   const isMoreActive = moreItems.some(
     (item) => pathname === item.href || pathname.startsWith(item.href + "/"),
@@ -90,7 +93,7 @@ export function BottomNav() {
           <DialogHeader>
             <DialogTitle>Menu Lainnya</DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-3 pb-[max(env(safe-area-inset-bottom),0.5rem)]">
+          <div className="grid grid-cols-2 gap-3">
             {moreItems.map((item) => {
               const isActive =
                 pathname === item.href || pathname.startsWith(item.href + "/");
@@ -111,6 +114,17 @@ export function BottomNav() {
                 </Link>
               );
             })}
+          </div>
+          <div className="pb-[max(env(safe-area-inset-bottom),0.5rem)]">
+            <button
+              type="button"
+              onClick={signOut}
+              disabled={isSigningOut}
+              className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-border p-3 text-sm font-semibold text-muted-foreground hover:bg-error-50 hover:text-error transition-all duration-150 min-h-[48px] disabled:opacity-50"
+            >
+              <LogOut className="h-5 w-5" />
+              {isSigningOut ? "Keluar..." : "Keluar"}
+            </button>
           </div>
         </DialogContent>
       </Dialog>
