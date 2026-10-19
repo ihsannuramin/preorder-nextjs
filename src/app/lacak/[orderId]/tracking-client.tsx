@@ -12,7 +12,8 @@ import { StoreIdentity } from "@/components/public/store-identity";
 import { buildChatSellerMessage, buildPaymentProofFollowupMessage, buildWaLink } from "@/lib/utils/whatsapp";
 import { MessageCircle, CheckCircle2, Circle } from "lucide-react";
 import type { OrderStatus } from "@prisma/client";
-import { formatDateTime, formatRelative } from "@/lib/utils/date";
+import { formatRelative } from "@/lib/utils/date";
+import { LocalDateTime } from "@/components/shared/local-date-time";
 import type { getPublicOrder } from "@/actions/orders";
 
 type OrderData = NonNullable<Awaited<ReturnType<typeof getPublicOrder>>>;
@@ -40,6 +41,8 @@ export function TrackingClient({ order }: { order: OrderData }) {
   const canUploadProof = order.status === "PENDING_PAYMENT";
   const isAwaitingVerification = order.status === "PAYMENT_REVIEW";
   const isPickup = order.fulfillmentMethod === "PICKUP";
+  const stepTime = (status: OrderStatus) =>
+    order.statusTimes[status] ?? (status === "PAID" ? order.verifiedAt : null);
 
   // Status berubah dari sisi toko: muat ulang berkala selama tab terlihat.
   useEffect(() => {
@@ -101,10 +104,11 @@ export function TrackingClient({ order }: { order: OrderData }) {
                       )}
                       <span className={done ? "font-medium text-foreground" : "text-muted-foreground"}>
                         {stepLabel(step, isPickup)}
-                        {step.status === "PAID" && done && order.verifiedAt && (
-                          <span className="block text-xs font-normal text-muted-foreground">
-                            {formatDateTime(order.verifiedAt)}
-                          </span>
+                        {done && stepTime(step.status) && (
+                          <LocalDateTime
+                            date={stepTime(step.status)!}
+                            className="block text-xs font-normal text-muted-foreground"
+                          />
                         )}
                       </span>
                     </div>

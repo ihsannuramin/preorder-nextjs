@@ -95,7 +95,7 @@ export async function getOrder(id: string) {
   const store = await getStore();
   const row = await prisma.order.findFirst({
     where: { id, campaign: { storeId: store.id } },
-    include: { campaign: true, items: true },
+    include: { campaign: true, items: true, statusHistory: { orderBy: { createdAt: "desc" } } },
   });
   return row ? serializeOrder(row) : null;
 }
@@ -192,6 +192,7 @@ export async function createPublicOrder(input: {
             customerPhone: data.customerPhone,
             customerAddress: data.fulfillmentMethod === "PICKUP" ? "" : data.customerAddress,
             fulfillmentMethod: data.fulfillmentMethod,
+            statusHistory: { create: { status: "PENDING_PAYMENT" } },
             customerNotes: data.customerNotes,
             totalAmount,
             totalHpp,
@@ -216,6 +217,7 @@ export async function getPublicOrder(orderId: string) {
     where: { id: orderId },
     include: {
       items: true,
+      statusHistory: { orderBy: { createdAt: "asc" }, select: { status: true, createdAt: true } },
       campaign: {
         include: {
           store: { select: publicStoreSelect },
@@ -238,6 +240,10 @@ export async function getPublicOrder(orderId: string) {
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,
     verifiedAt: order.verifiedAt,
+    // Waktu terakhir tiap status tercapai (status bisa berulang, mis. bukti ditolak).
+    statusTimes: Object.fromEntries(
+      order.statusHistory.map((h) => [h.status, h.createdAt]),
+    ) as Partial<Record<OrderStatus, Date>>,
     items: order.items.map((item) => ({
       id: item.id,
       productName: item.productName,
@@ -289,10 +295,17 @@ export async function updateOrderStatus(
 ): Promise<ActionResult> {
   try {
     const store = await getStore();
-    await prisma.order.update({
+    const current = await prisma.order.findFirst({
       where: { id, campaign: { storeId: store.id } },
-      data: { status },
+      select: { status: true },
     });
+    if (!current) return { success: false, error: "Pesanan tidak ditemukan" };
+    if (current.status !== status) {
+      await prisma.$transaction([
+        prisma.order.update({ where: { id }, data: { status } }),
+        prisma.orderStatusHistory.create({ data: { orderId: id, status } }),
+      ]);
+    }
     revalidatePath("/pesanan");
     revalidatePath(`/pesanan/${id}`);
     return { success: true, data: undefined };
@@ -308,10 +321,19 @@ export async function bulkUpdateOrderStatus(
 ): Promise<ActionResult> {
   try {
     const store = await getStore();
-    await prisma.order.updateMany({
-      where: { id: { in: ids }, campaign: { storeId: store.id } },
-      data: { status },
+    const changed = await prisma.order.findMany({
+      where: { id: { in: ids }, campaign: { storeId: store.id }, status: { not: status } },
+      select: { id: true },
     });
+    const changedIds = changed.map((o) => o.id);
+    if (changedIds.length > 0) {
+      await prisma.$transaction([
+        prisma.order.updateMany({ where: { id: { in: changedIds } }, data: { status } }),
+        prisma.orderStatusHistory.createMany({
+          data: changedIds.map((orderId) => ({ orderId, status })),
+        }),
+      ]);
+    }
     revalidatePath("/pesanan");
     return { success: true, data: undefined };
   } catch (err) {
@@ -325,13 +347,16 @@ export async function uploadPaymentProof(
   proofUrl: string
 ): Promise<ActionResult> {
   try {
-    await prisma.order.update({
-      where: { id: orderId },
-      data: {
-        paymentProofUrl: proofUrl,
-        status: "PAYMENT_REVIEW",
-      },
-    });
+    await prisma.$transaction([
+      prisma.order.update({
+        where: { id: orderId },
+        data: {
+          paymentProofUrl: proofUrl,
+          status: "PAYMENT_REVIEW",
+        },
+      }),
+      prisma.orderStatusHistory.create({ data: { orderId, status: "PAYMENT_REVIEW" } }),
+    ]);
     return { success: true, data: undefined };
   } catch (err) {
     logger.error("uploadPaymentProof failed", err);

@@ -10,7 +10,8 @@ import { formatDateTime } from "@/lib/utils/date";
 import { OrderStatusActions } from "./order-status-actions";
 import { PaymentVerification } from "./payment-verification";
 import { WhatsAppActions } from "./whatsapp-actions";
-import { ArrowLeft, User, MapPin, Phone, ShoppingBag } from "lucide-react";
+import { ArrowLeft, User, MapPin, Phone, ShoppingBag, History } from "lucide-react";
+import { LocalDateTime } from "@/components/shared/local-date-time";
 import { ORDER_STATUS } from "@/lib/constants/status";
 import type { OrderStatus } from "@prisma/client";
 
@@ -127,6 +128,25 @@ export default async function PesananDetailPage({
             </CardContent>
           </Card>
         </div>
+
+        {order.statusHistory.length > 0 && (
+          <Card>
+            <CardHeader><CardTitle className="text-base flex items-center gap-2">
+              <History className="h-4 w-4" /> Riwayat Status
+            </CardTitle></CardHeader>
+            <CardContent>
+              <ol className="space-y-3 border-l-2 border-border pl-4">
+                {order.statusHistory.map((h) => (
+                  <li key={h.id} className="relative">
+                    <span className="absolute -left-[21px] top-1.5 h-2.5 w-2.5 rounded-full bg-primary" aria-hidden="true" />
+                    <Badge variant={ORDER_STATUS[h.status].variant}>{ORDER_STATUS[h.status].label}</Badge>
+                    <LocalDateTime date={h.createdAt} className="block mt-0.5 text-xs text-muted-foreground" />
+                  </li>
+                ))}
+              </ol>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </>
   );

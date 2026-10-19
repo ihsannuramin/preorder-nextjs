@@ -350,10 +350,24 @@ model Order {
   campaign Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   store    Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
   items    OrderItem[]
+  statusHistory OrderStatusHistory[]
 
   @@unique([storeId, orderNumber])
   @@index([storeId])
   @@map("orders")
+}
+
+// Jejak waktu tiap perubahan status pesanan (untuk timeline pelanggan & penjual).
+model OrderStatusHistory {
+  id        String      @id @default(cuid())
+  orderId   String
+  status    OrderStatus
+  createdAt DateTime    @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, createdAt])
+  @@map("order_status_history")
 }
 
 model OrderItem {

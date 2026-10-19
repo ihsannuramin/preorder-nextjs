@@ -26,10 +26,13 @@ async function getStore() {
 export async function approvePayment(orderId: string): Promise<ActionResult> {
   try {
     const store = await getStore();
-    await prisma.order.update({
-      where: { id: orderId, campaign: { storeId: store.id } },
-      data: { status: "PAID", verifiedAt: new Date() },
-    });
+    await prisma.$transaction([
+      prisma.order.update({
+        where: { id: orderId, campaign: { storeId: store.id } },
+        data: { status: "PAID", verifiedAt: new Date() },
+      }),
+      prisma.orderStatusHistory.create({ data: { orderId, status: "PAID" } }),
+    ]);
     revalidatePath("/pesanan");
     revalidatePath(`/pesanan/${orderId}`);
     return { success: true, data: undefined };
@@ -152,14 +155,17 @@ export async function rejectPayment(
 ): Promise<ActionResult> {
   try {
     const store = await getStore();
-    await prisma.order.update({
-      where: { id: orderId, campaign: { storeId: store.id } },
-      data: {
-        status: "PENDING_PAYMENT",
-        rejectionReason: reason,
-        paymentProofUrl: null,
-      },
-    });
+    await prisma.$transaction([
+      prisma.order.update({
+        where: { id: orderId, campaign: { storeId: store.id } },
+        data: {
+          status: "PENDING_PAYMENT",
+          rejectionReason: reason,
+          paymentProofUrl: null,
+        },
+      }),
+      prisma.orderStatusHistory.create({ data: { orderId, status: "PENDING_PAYMENT" } }),
+    ]);
     revalidatePath("/pesanan");
     revalidatePath(`/pesanan/${orderId}`);
     return { success: true, data: undefined };
