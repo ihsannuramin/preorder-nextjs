@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -37,6 +37,16 @@ export default function MasukPage() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [googlePending, setGooglePending] = useState(false);
+
+  // Error dari link email (/api/auth/confirm, /api/auth/callback).
+  useEffect(() => {
+    const error = new URLSearchParams(window.location.search).get("error");
+    if (error === "reset_link_invalid") {
+      toast.error("Link reset password tidak valid atau sudah kedaluwarsa. Minta link baru.");
+    } else if (error === "auth_callback_error") {
+      toast.error("Link verifikasi tidak valid atau sudah kedaluwarsa. Coba masuk lagi.");
+    }
+  }, []);
 
   function handleLogin(formData: FormData) {
     startTransition(async () => {

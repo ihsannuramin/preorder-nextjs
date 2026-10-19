@@ -1,11 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { safeNextPath } from "@/lib/utils/safe-redirect";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next");
+  const next = safeNextPath(searchParams.get("next"));
 
   if (code) {
     const supabase = await createClient();
@@ -35,5 +36,6 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/masuk?error=auth_callback_error`);
+  const errorParam = next === "/reset-password" ? "reset_link_invalid" : "auth_callback_error";
+  return NextResponse.redirect(`${origin}/masuk?error=${errorParam}`);
 }
