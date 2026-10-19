@@ -7,7 +7,10 @@ import { StoreIdentity } from "@/components/public/store-identity";
 import { OrderForm } from "./order-form";
 import type { Metadata } from "next";
 
-type Props = { params: Promise<{ slug: string; campaignId: string }> };
+type Props = {
+  params: Promise<{ slug: string; campaignId: string }>;
+  searchParams?: Promise<{ produk?: string }>;
+};
 
 async function getCampaign(slug: string, campaignId: string) {
   const campaign = await prisma.campaign.findUnique({
@@ -22,6 +25,8 @@ async function getCampaign(slug: string, campaignId: string) {
               name: true,
               basePrice: true,
               imageUrl: true,
+              images: true,
+              description: true,
             },
           },
         },
@@ -54,8 +59,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function OrderFormPage({ params }: Props) {
+export default async function OrderFormPage({ params, searchParams }: Props) {
   const { slug, campaignId } = await params;
+  const { produk } = (await searchParams) ?? {};
   const campaign = await getCampaign(slug, campaignId);
 
   if (!campaign) notFound();
@@ -82,7 +88,12 @@ export default async function OrderFormPage({ params }: Props) {
           />
           <h1 className="text-xl font-bold mt-3">{campaign.name}</h1>
         </div>
-        <OrderForm campaign={campaign} slug={slug} campaignId={campaignId} />
+        <OrderForm
+          campaign={campaign}
+          slug={slug}
+          campaignId={campaignId}
+          initialProductId={produk}
+        />
         <PoweredByFooter className="mt-8" />
       </div>
     </div>
