@@ -17,7 +17,7 @@ async function getCampaign(slug: string, campaignId: string) {
   const campaign = await prisma.campaign.findUnique({
     where: { id: campaignId },
     include: {
-      store: { select: publicStoreSelect },
+      store: { select: { ...publicStoreSelect, googleMapsUrl: true, showGoogleMaps: true } },
       products: {
         include: {
           product: {
@@ -37,13 +37,17 @@ async function getCampaign(slug: string, campaignId: string) {
 
   if (!campaign || campaign.store.slug !== slug || !campaign.store.isActive) return null;
 
+  // Link Maps hanya dikirim ke browser bila toko memilih menampilkannya.
+  const { googleMapsUrl, showGoogleMaps, ...store } = campaign.store;
+
   return {
     id: campaign.id,
     name: campaign.name,
     description: campaign.description,
     closeDate: campaign.closeDate.toISOString(),
     isOpen: campaign.status === "OPEN" && new Date() <= campaign.closeDate,
-    store: campaign.store,
+    store,
+    pickup: googleMapsUrl ? { mapsUrl: showGoogleMaps ? googleMapsUrl : null } : null,
     products: campaign.products.map((cp) => ({
       product: {
         ...cp.product,

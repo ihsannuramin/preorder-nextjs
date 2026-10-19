@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
       "Nomor Pesanan": o.orderNumber,
       "Nama Pelanggan": o.customerName,
       "No HP": o.customerPhone,
+      "Cara Terima": o.fulfillmentMethod === "PICKUP" ? "Ambil sendiri" : "Diantar",
       "Alamat": o.customerAddress,
       "Total (Rp)": Number(o.totalAmount),
       "HPP (Rp)": Number(o.totalHpp),

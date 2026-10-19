@@ -89,7 +89,14 @@ export default async function PesananDetailPage({
               </div>
               <div className="flex items-start gap-2">
                 <MapPin className="h-3.5 w-3.5 text-muted-foreground mt-0.5" />
-                <span>{order.customerAddress}</span>
+                {order.fulfillmentMethod === "PICKUP" ? (
+                  <span className="font-medium">Ambil sendiri di toko</span>
+                ) : (
+                  <span>
+                    <span className="mr-1.5 rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold">Diantar</span>
+                    {order.customerAddress}
+                  </span>
+                )}
               </div>
               {order.customerNotes && (
                 <p className="text-muted-foreground italic">"{order.customerNotes}"</p>

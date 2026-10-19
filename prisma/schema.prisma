@@ -46,6 +46,11 @@ enum PaymentMethodType {
   QRIS
 }
 
+enum FulfillmentMethod {
+  DELIVERY
+  PICKUP
+}
+
 enum GroupOrderStatus {
   COLLECTING
   CLOSED
@@ -329,6 +334,8 @@ model Order {
   customerName     String
   customerPhone    String
   customerAddress  String
+  // PICKUP = ambil sendiri di toko offline; alamat boleh kosong.
+  fulfillmentMethod FulfillmentMethod @default(DELIVERY)
   customerNotes    String?
   totalAmount      Decimal     @db.Decimal(12, 2)
   totalHpp         Decimal     @default(0) @db.Decimal(12, 2)

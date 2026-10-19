@@ -13,12 +13,16 @@ import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { createPublicOrder } from "@/actions/orders";
 import { orderSchema } from "@/lib/validations/order";
 import { cn } from "@/lib/utils/cn";
-import { Plus, Minus, ShoppingBag, Package } from "lucide-react";
+import { Plus, Minus, ShoppingBag, Package, Truck, Store as StoreIcon, MapPin } from "lucide-react";
+
+type FulfillmentMethod = "DELIVERY" | "PICKUP";
 
 type CampaignData = {
   id: string;
   name: string;
   store: { name: string; slug: string };
+  /** null = toko tidak melayani ambil sendiri. */
+  pickup: { mapsUrl: string | null } | null;
   products: {
     product: {
       id: string;
@@ -83,6 +87,8 @@ export function OrderForm({
     customerAddress: "",
     customerNotes: "",
   });
+  const [fulfillmentMethod, setFulfillmentMethod] = useState<FulfillmentMethod>("DELIVERY");
+  const isPickup = fulfillmentMethod === "PICKUP";
   const [errors, setErrors] = useState<Partial<Record<CustomerField | "items", string>>>({});
   const fieldRefs = useRef<Partial<Record<CustomerField, HTMLInputElement | HTMLTextAreaElement | null>>>({});
 
@@ -123,7 +129,7 @@ export function OrderForm({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    const parsed = orderSchema.safeParse({ ...customerData, items: orderItems });
+    const parsed = orderSchema.safeParse({ ...customerData, fulfillmentMethod, items: orderItems });
     if (!parsed.success) {
       const next: typeof errors = {};
       for (const issue of parsed.error.issues) {
@@ -144,6 +150,8 @@ export function OrderForm({
       const result = await createPublicOrder({
         campaignId,
         ...customerData,
+        customerAddress: isPickup ? "" : customerData.customerAddress,
+        fulfillmentMethod,
         items: orderItems,
       });
 
@@ -241,9 +249,66 @@ export function OrderForm({
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Informasi Pengiriman</CardTitle>
+          <CardTitle className="text-base">{isPickup ? "Data Pemesan" : "Informasi Pengiriman"}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {campaign.pickup && (
+            <div role="radiogroup" aria-label="Cara terima pesanan" className="grid grid-cols-2 gap-2">
+              {(
+                [
+                  { value: "DELIVERY", label: "Diantar", hint: "Ke alamatmu", icon: Truck },
+                  { value: "PICKUP", label: "Ambil sendiri", hint: "Di toko", icon: StoreIcon },
+                ] as const
+              ).map((opt) => {
+                const active = fulfillmentMethod === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    onClick={() => {
+                      setFulfillmentMethod(opt.value);
+                      setErrors((prev) => ({ ...prev, customerAddress: undefined }));
+                    }}
+                    className={cn(
+                      "flex items-center gap-2 rounded-lg border-2 p-3 text-left transition-all",
+                      active
+                        ? "border-primary bg-primary-50 text-primary-700"
+                        : "border-border text-muted-foreground hover:bg-muted",
+                    )}
+                  >
+                    <opt.icon className="h-5 w-5 flex-shrink-0" />
+                    <span>
+                      <span className="block text-sm font-semibold">{opt.label}</span>
+                      <span className="block text-[11px]">{opt.hint}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          {isPickup && (
+            <div className="flex items-start gap-2 rounded-lg bg-muted p-3 text-sm text-muted-foreground">
+              <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5" />
+              <p>
+                Waktu pengambilan diinfokan {campaign.store.name} lewat WhatsApp.
+                {campaign.pickup?.mapsUrl && (
+                  <>
+                    {" "}
+                    <a
+                      href={campaign.pickup.mapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-primary-600 underline"
+                    >
+                      Lihat lokasi toko
+                    </a>
+                  </>
+                )}
+              </p>
+            </div>
+          )}
           <div className="space-y-1.5">
             <Label htmlFor="customerName">Nama Lengkap</Label>
             <Input
@@ -273,7 +338,7 @@ export function OrderForm({
             />
             <FieldError field="customerPhone" />
           </div>
-          <div className="space-y-1.5">
+          <div className={cn("space-y-1.5", isPickup && "hidden")}>
             <Label htmlFor="customerAddress">Alamat Lengkap</Label>
             <Textarea
               {...fieldProps("customerAddress")}
@@ -292,7 +357,7 @@ export function OrderForm({
             <Input
               {...fieldProps("customerNotes")}
               onChange={(e) => updateField("customerNotes", e.target.value)}
-              placeholder="Misalnya: titip ke satpam"
+              placeholder={isPickup ? "Misalnya: ambil sore hari" : "Misalnya: titip ke satpam"}
             />
           </div>
           <p className="text-[11px] text-muted-foreground">

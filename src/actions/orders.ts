@@ -11,6 +11,7 @@ import { formatOrderNumber, isOrderNumberConflict } from "@/lib/utils/order-numb
 import { createLogger } from "@/lib/logger";
 import type { ActionResult } from "@/types";
 import { cleanPhone } from "@/lib/utils/whatsapp";
+import { orderSchema, type FulfillmentMethodInput } from "@/lib/validations/order";
 
 const logger = createLogger("action:orders");
 
@@ -99,24 +100,43 @@ export async function getOrder(id: string) {
   return row ? serializeOrder(row) : null;
 }
 
-export async function createPublicOrder(data: {
+export async function createPublicOrder(input: {
   campaignId: string;
   customerName: string;
   customerPhone: string;
-  customerAddress: string;
+  customerAddress?: string;
   customerNotes?: string;
+  fulfillmentMethod?: FulfillmentMethodInput;
   items: { productId: string; quantity: number }[];
 }): Promise<ActionResult<{ orderNumber: string; orderId: string }>> {
   try {
+    const parsed = orderSchema.safeParse(input);
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0].message };
+    }
+    const data = { ...parsed.data, campaignId: input.campaignId };
+
     const campaign = await prisma.campaign.findUnique({
       where: { id: data.campaignId },
-      include: { store: true },
+      include: { store: true, products: { select: { productId: true } } },
     });
 
     if (!campaign) return { success: false, error: "PO ini tidak ditemukan. Cek lagi link dari toko, ya." };
     if (!campaign.store.isActive) return { success: false, error: "Toko ini sedang tidak menerima pesanan." };
     if (campaign.status !== "OPEN") return { success: false, error: "PO ini sudah tutup. Chat toko buat tahu PO berikutnya." };
     if (new Date() > campaign.closeDate) return { success: false, error: "PO ini sudah tutup. Chat toko buat tahu PO berikutnya." };
+    if (data.fulfillmentMethod === "PICKUP" && !campaign.store.googleMapsUrl) {
+      return { success: false, error: "Toko ini belum melayani ambil sendiri. Pilih diantar, ya." };
+    }
+
+    const campaignProductIds = new Set(campaign.products.map((cp) => cp.productId));
+    const requestedIds = data.items.map((item) => item.productId);
+    if (
+      new Set(requestedIds).size !== requestedIds.length ||
+      requestedIds.some((id) => !campaignProductIds.has(id))
+    ) {
+      return { success: false, error: "Ada produk yang tidak tersedia di PO ini. Muat ulang halaman, ya." };
+    }
 
     let totalAmount = 0;
     let totalHpp = 0;
@@ -170,7 +190,8 @@ export async function createPublicOrder(data: {
             orderNumber,
             customerName: data.customerName,
             customerPhone: data.customerPhone,
-            customerAddress: data.customerAddress,
+            customerAddress: data.fulfillmentMethod === "PICKUP" ? "" : data.customerAddress,
+            fulfillmentMethod: data.fulfillmentMethod,
             customerNotes: data.customerNotes,
             totalAmount,
             totalHpp,
