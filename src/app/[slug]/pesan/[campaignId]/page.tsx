@@ -4,6 +4,7 @@ import { publicStoreSelect } from "@/lib/public-store";
 import { PoweredByFooter } from "@/components/public/powered-by-footer";
 import { PublicNotice } from "@/components/public/public-notice";
 import { StoreIdentity } from "@/components/public/store-identity";
+import { CloseCountdown } from "@/components/public/close-countdown";
 import { OrderForm } from "./order-form";
 import type { Metadata } from "next";
 
@@ -39,6 +40,8 @@ async function getCampaign(slug: string, campaignId: string) {
   return {
     id: campaign.id,
     name: campaign.name,
+    description: campaign.description,
+    closeDate: campaign.closeDate.toISOString(),
     isOpen: campaign.status === "OPEN" && new Date() <= campaign.closeDate,
     store: campaign.store,
     products: campaign.products.map((cp) => ({
@@ -87,6 +90,15 @@ export default async function OrderFormPage({ params, searchParams }: Props) {
             size="sm"
           />
           <h1 className="text-xl font-bold mt-3">{campaign.name}</h1>
+          <CloseCountdown
+            closeDate={campaign.closeDate}
+            className="mt-1 justify-center text-muted-foreground"
+          />
+          {campaign.description && (
+            <p className="mx-auto mt-3 max-w-md whitespace-pre-line text-sm text-muted-foreground">
+              {campaign.description}
+            </p>
+          )}
         </div>
         <OrderForm
           campaign={campaign}

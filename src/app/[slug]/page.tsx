@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatDate } from "@/lib/utils/date";
+import { CloseCountdown } from "@/components/public/close-countdown";
 import { PoweredByFooter } from "@/components/public/powered-by-footer";
 import { StoreIdentity } from "@/components/public/store-identity";
 import { StoreBannerCarousel } from "@/components/public/store-banner-carousel";
@@ -210,11 +210,17 @@ export default async function PublicStorePage({
                 className="rounded-card border border-primary-200 bg-primary-50 p-4"
               >
                 <div className="flex items-start justify-between gap-3 mb-3">
-                  <div>
+                  <div className="min-w-0">
                     <h3 className="font-semibold text-primary-900">{campaign.name}</h3>
-                    <p className="text-xs text-primary-700">
-                      Ditutup {formatDate(campaign.closeDate)}
-                    </p>
+                    <CloseCountdown
+                      closeDate={campaign.closeDate.toISOString()}
+                      className="mt-0.5 text-primary-700"
+                    />
+                    {campaign.description && (
+                      <p className="mt-2 line-clamp-3 whitespace-pre-line text-sm text-primary-900/80">
+                        {campaign.description}
+                      </p>
+                    )}
                   </div>
                   <Badge variant="default" className="flex-shrink-0">Buka</Badge>
                 </div>
